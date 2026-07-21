@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DeployNexus.API\DeployNexus.API.csproj" />
+    <ProjectReference Include="..\..\src\DeployNexus.Application\DeployNexus.Application.csproj" />
+    <ProjectReference Include="..\..\src\DeployNexus.Domain\DeployNexus.Domain.csproj" />
+    <ProjectReference Include="..\..\src\DeployNexus.Infrastructure\DeployNexus.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\DeployNexus.Shared\DeployNexus.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>
