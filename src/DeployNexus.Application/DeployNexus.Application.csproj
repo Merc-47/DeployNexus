@@ -11,4 +11,9 @@
     <ProjectReference Include="..\DeployNexus.Shared\DeployNexus.Shared.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Interfaces\" />
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>
