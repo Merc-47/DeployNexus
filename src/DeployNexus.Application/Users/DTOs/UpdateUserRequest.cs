@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DeployNexus.Application.DTOs;
+namespace DeployNexus.Application.Users.DTOs;
 
 public class UpdateUserRequest
 {
