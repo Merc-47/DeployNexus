@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using DeployNexus.Application.Users.DTOs;
 using DeployNexus.Application.Users.Services;
+using DeployNexus.Tests.Repositories;
 
 namespace DeployNexus.Tests.Users;
 
@@ -15,7 +16,9 @@ public class UserServiceTests
     public async Task CreateAsync_ShouldCreateUserSuccessfully()
     {
         // Arrange
-        var service = new UserService();
+        var repository = new FakeUserRepository();
+
+        var service = new UserService(repository);
 
         var request = new CreateUserRequest
         {
@@ -40,7 +43,9 @@ public class UserServiceTests
     public async Task GetByIdAsync_ShouldReturnUser_WhenUserExists()
     {
         // Arrange
-        var service = new UserService();
+        var repository = new FakeUserRepository();
+
+        var service = new UserService(repository);
 
         var createdUser = await service.CreateAsync(new CreateUserRequest
         {
@@ -64,7 +69,9 @@ public class UserServiceTests
     public async Task GetAllAsync_ShouldReturnAllUsers()
     {
         // Arrange
-        var service = new UserService();
+        var repository = new FakeUserRepository();
+
+        var service = new UserService(repository);
 
         await service.CreateAsync(new CreateUserRequest
         {
@@ -95,7 +102,9 @@ public class UserServiceTests
     public async Task UpdateAsync_ShouldUpdateUser_WhenUserExists()
     {
         // Arrange
-        var service = new UserService();
+        var repository = new FakeUserRepository();
+
+        var service = new UserService(repository);
 
         var createdUser = await service.CreateAsync(new CreateUserRequest
         {
@@ -130,7 +139,9 @@ public class UserServiceTests
     public async Task DeactivateAsync_ShouldDeactivateUser_WhenUserExists()
     {
         // Arrange
-        var service = new UserService();
+        var repository = new FakeUserRepository();
+
+        var service = new UserService(repository);
 
         var user = await service.CreateAsync(new CreateUserRequest
         {

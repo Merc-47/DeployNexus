@@ -1,18 +1,14 @@
-﻿using DeployNexus.Domain.Common;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DeployNexus.Domain.Entities;
+namespace DeployNexus.Application.Organizations.DTOs;
 
-public class Organization : BaseEntity
+public class UpdateOrganizationRequest
 {
     public string Name { get; set; } = string.Empty;
 
     public string Code { get; set; } = string.Empty;
-
-    public bool IsActive { get; set; } = true;
 }
-
