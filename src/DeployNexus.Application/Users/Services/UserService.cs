@@ -1,22 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DeployNexus.Application.Users.Services;
-
-using DeployNexus.Application.Common;
+﻿using DeployNexus.Application.Common;
+using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Application.Users.DTOs;
 using DeployNexus.Application.Users.Interfaces;
 using DeployNexus.Domain.Entities;
 
+namespace DeployNexus.Application.Users.Services;
+
 public class UserService : IUserService
 {
-    private readonly List<User> _users = new();
+    private readonly IUserRepository _userRepository;
 
 
-    public Task<UserDto> CreateAsync(CreateUserRequest request)
+    public UserService(IUserRepository userRepository)
+    {
+        _userRepository = userRepository;
+    }
+
+
+    public async Task<UserDto> CreateAsync(CreateUserRequest request)
     {
         var user = new User
         {
@@ -28,42 +29,42 @@ public class UserService : IUserService
             IsActive = true
         };
 
-        _users.Add(user);
+        await _userRepository.AddAsync(user);
 
-        return Task.FromResult(MapToDto(user));
+        await _userRepository.SaveChangesAsync();
+
+        return MapToDto(user);
     }
 
 
-    public Task<UserDto?> GetByIdAsync(Guid id)
+    public async Task<UserDto?> GetByIdAsync(Guid id)
     {
-        var user = _users.FirstOrDefault(x => x.Id == id);
+        var user = await _userRepository.GetByIdAsync(id);
 
         if (user == null)
         {
-            return Task.FromResult<UserDto?>(null);
+            return null;
         }
 
-        return Task.FromResult<UserDto?>(MapToDto(user));
+        return MapToDto(user);
     }
 
 
-    public Task<IEnumerable<UserDto>> GetAllAsync()
+    public async Task<IEnumerable<UserDto>> GetAllAsync()
     {
-        var users = _users
-            .Select(MapToDto)
-            .ToList();
+        var users = await _userRepository.GetAllAsync();
 
-        return Task.FromResult<IEnumerable<UserDto>>(users);
+        return users.Select(MapToDto);
     }
 
 
-    public Task<UserDto?> UpdateAsync(Guid id, UpdateUserRequest request)
+    public async Task<UserDto?> UpdateAsync(Guid id, UpdateUserRequest request)
     {
-        var user = _users.FirstOrDefault(x => x.Id == id);
+        var user = await _userRepository.GetByIdAsync(id);
 
         if (user == null)
         {
-            return Task.FromResult<UserDto?>(null);
+            return null;
         }
 
         user.Username = request.Username;
@@ -71,26 +72,30 @@ public class UserService : IUserService
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
 
-        return Task.FromResult<UserDto?>(MapToDto(user));
+        await _userRepository.UpdateAsync(user);
+
+        await _userRepository.SaveChangesAsync();
+
+        return MapToDto(user);
     }
 
 
-    public Task<Result> DeactivateAsync(Guid id)
+    public async Task<Result> DeactivateAsync(Guid id)
     {
-        var user = _users.FirstOrDefault(x => x.Id == id);
+        var user = await _userRepository.GetByIdAsync(id);
 
         if (user == null)
         {
-            return Task.FromResult(
-                Result.Failure("User not found")
-            );
+            return Result.Failure("User not found");
         }
 
         user.IsActive = false;
 
-        return Task.FromResult(
-            Result.Ok()
-        );
+        await _userRepository.UpdateAsync(user);
+
+        await _userRepository.SaveChangesAsync();
+
+        return Result.Ok();
     }
 
 
