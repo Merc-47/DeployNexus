@@ -20,8 +20,4 @@
     <ProjectReference Include="..\DeployNexus.Shared\DeployNexus.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Controllers\" />
-  </ItemGroup>
-
 </Project>

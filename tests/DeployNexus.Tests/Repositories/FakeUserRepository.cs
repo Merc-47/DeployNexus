@@ -29,7 +29,12 @@ public class FakeUserRepository : IUserRepository
         return Task.FromResult<IEnumerable<User>>(_users);
     }
 
-
+    public Task<IEnumerable<User>> GetInactiveUsersAsync()
+    {
+        return Task.FromResult(
+            _users.Where(x => !x.IsActive)
+        );
+    }
     public Task UpdateAsync(User user)
     {
         var existingUser = _users.FirstOrDefault(x => x.Id == user.Id);

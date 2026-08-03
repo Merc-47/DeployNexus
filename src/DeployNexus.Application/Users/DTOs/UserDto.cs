@@ -19,4 +19,6 @@ public class UserDto
     public string LastName { get; set; } = string.Empty;
 
     public bool IsActive { get; set; }
+
+    public Guid OrganizationId { get; set; }
 }

@@ -9,6 +9,8 @@ public interface IUserRepository
 
     Task<IEnumerable<User>> GetAllAsync();
 
+    Task<IEnumerable<User>> GetInactiveUsersAsync();
+
     Task UpdateAsync(User user);
 
     Task SaveChangesAsync();

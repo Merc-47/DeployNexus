@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 using DeployNexus.Application.Users.DTOs;
 using DeployNexus.Application.Users.Services;
+using DeployNexus.Domain.Entities;
 using DeployNexus.Tests.Repositories;
 
 namespace DeployNexus.Tests.Users;
@@ -20,12 +21,15 @@ public class UserServiceTests
 
         var service = new UserService(repository);
 
+        var organizationId = Guid.NewGuid();
+
         var request = new CreateUserRequest
         {
             Username = "jason",
             Email = "jason@test.com",
             FirstName = "Jason",
-            LastName = "Broody"
+            LastName = "Broody",
+            OrganizationId = organizationId
         };
 
 
@@ -47,12 +51,15 @@ public class UserServiceTests
 
         var service = new UserService(repository);
 
+        var organizationId = Guid.NewGuid();
+
         var createdUser = await service.CreateAsync(new CreateUserRequest
         {
             Username = "jason",
             Email = "jason@test.com",
             FirstName = "Jason",
-            LastName = "Broody"
+            LastName = "Broody",
+            OrganizationId = organizationId
         });
 
 
@@ -73,12 +80,15 @@ public class UserServiceTests
 
         var service = new UserService(repository);
 
+        var organizationId = Guid.NewGuid();
+
         await service.CreateAsync(new CreateUserRequest
         {
             Username = "jason",
             Email = "jason@test.com",
             FirstName = "Jason",
-            LastName = "Broody"
+            LastName = "Broody",
+            OrganizationId = organizationId
         });
 
         await service.CreateAsync(new CreateUserRequest
@@ -86,7 +96,8 @@ public class UserServiceTests
             Username = "admin",
             Email = "admin@test.com",
             FirstName = "Admin",
-            LastName = "User"
+            LastName = "User",
+            OrganizationId = organizationId
         });
 
 
@@ -106,12 +117,15 @@ public class UserServiceTests
 
         var service = new UserService(repository);
 
+        var organizationId = Guid.NewGuid();
+
         var createdUser = await service.CreateAsync(new CreateUserRequest
         {
             Username = "jason",
             Email = "old@test.com",
             FirstName = "Jason",
-            LastName = "Old"
+            LastName = "Old",
+            OrganizationId = organizationId
         });
 
         var updateRequest = new UpdateUserRequest
@@ -119,7 +133,8 @@ public class UserServiceTests
             Username = "jason.updated",
             Email = "new@test.com",
             FirstName = "Jason",
-            LastName = "Updated"
+            LastName = "Updated",
+            OrganizationId = organizationId
         };
 
 
@@ -143,12 +158,15 @@ public class UserServiceTests
 
         var service = new UserService(repository);
 
+        var organizationId = Guid.NewGuid();
+
         var user = await service.CreateAsync(new CreateUserRequest
         {
             Username = "jason",
             Email = "jason@test.com",
             FirstName = "Jason",
-            LastName = "Broody"
+            LastName = "Broody",
+            OrganizationId = organizationId
         });
 
 

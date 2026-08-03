@@ -33,9 +33,17 @@ public class UserRepository : IUserRepository
 
     public async Task<IEnumerable<User>> GetAllAsync()
     {
-        return await _context.Users.ToListAsync();
+        return await _context.Users
+            .Where(x => x.IsActive)
+            .ToListAsync();
     }
 
+    public async Task<IEnumerable<User>> GetInactiveUsersAsync()
+    {
+        return await _context.Users
+            .Where(x => !x.IsActive)
+            .ToListAsync();
+    }
 
     public Task UpdateAsync(User user)
     {
