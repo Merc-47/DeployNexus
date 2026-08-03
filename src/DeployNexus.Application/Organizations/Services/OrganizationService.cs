@@ -1,4 +1,5 @@
 ﻿using DeployNexus.Application.Common;
+using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Application.Organizations.DTOs;
 using DeployNexus.Application.Organizations.Interfaces;
 using DeployNexus.Domain.Entities;
@@ -7,9 +8,15 @@ namespace DeployNexus.Application.Organizations.Services;
 
 public class OrganizationService : IOrganizationService
 {
-    private readonly List<Organization> _organizations = new();
+    private readonly IOrganizationRepository _organizationRepository;
 
-    public Task<OrganizationDto> CreateAsync(CreateOrganizationRequest request)
+    public OrganizationService(
+    IOrganizationRepository organizationRepository)
+    {
+        _organizationRepository = organizationRepository;
+    }
+
+    public async Task<OrganizationDto> CreateAsync(CreateOrganizationRequest request)
     {
         var organization = new Organization
         {
@@ -19,50 +26,65 @@ public class OrganizationService : IOrganizationService
             IsActive = true
         };
 
-        _organizations.Add(organization);
+        await _organizationRepository.AddAsync(organization);
 
-        return Task.FromResult(MapToDto(organization));
+        await _organizationRepository.SaveChangesAsync();
+
+        return MapToDto(organization);
     }
 
-    public Task<OrganizationDto?> GetByIdAsync(Guid id)
+    public async Task<OrganizationDto?> GetByIdAsync(Guid id)
     {
-        var organization = _organizations.FirstOrDefault(x => x.Id == id);
+        var organization =
+            await _organizationRepository.GetByIdAsync(id);
 
         if (organization == null)
-            return Task.FromResult<OrganizationDto?>(null);
+            return null;
 
-        return Task.FromResult<OrganizationDto?>(MapToDto(organization));
+        return MapToDto(organization);
     }
 
-    public Task<IEnumerable<OrganizationDto>> GetAllAsync()
+    public async Task<IEnumerable<OrganizationDto>> GetAllAsync()
     {
-        return Task.FromResult<IEnumerable<OrganizationDto>>(
-            _organizations.Select(MapToDto).ToList());
+        var organizations =
+     await _organizationRepository.GetAllAsync();
+
+        return organizations.Select(MapToDto);
     }
 
-    public Task<OrganizationDto?> UpdateAsync(Guid id, UpdateOrganizationRequest request)
+    public async Task<OrganizationDto?> UpdateAsync(
+    Guid id,
+    UpdateOrganizationRequest request)
     {
-        var organization = _organizations.FirstOrDefault(x => x.Id == id);
+        var organization = await _organizationRepository.GetByIdAsync(id);
 
         if (organization == null)
-            return Task.FromResult<OrganizationDto?>(null);
+            return null;
 
         organization.Name = request.Name;
         organization.Code = request.Code;
 
-        return Task.FromResult<OrganizationDto?>(MapToDto(organization));
+        await _organizationRepository.UpdateAsync(organization);
+
+        await _organizationRepository.SaveChangesAsync();
+
+        return MapToDto(organization);
     }
 
-    public Task<Result> DeactivateAsync(Guid id)
+    public async Task<Result> DeactivateAsync(Guid id)
     {
-        var organization = _organizations.FirstOrDefault(x => x.Id == id);
+        var organization = await _organizationRepository.GetByIdAsync(id);
 
         if (organization == null)
-            return Task.FromResult(Result.Failure("Organization not found"));
+            return Result.Failure("Organization not found");
 
         organization.IsActive = false;
 
-        return Task.FromResult(Result.Ok());
+        await _organizationRepository.UpdateAsync(organization);
+
+        await _organizationRepository.SaveChangesAsync();
+
+        return Result.Ok();
     }
 
     private static OrganizationDto MapToDto(Organization organization)
@@ -75,4 +97,5 @@ public class OrganizationService : IOrganizationService
             IsActive = organization.IsActive
         };
     }
+
 }

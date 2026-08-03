@@ -5,10 +5,17 @@ namespace DeployNexus.Tests.Organizations;
 
 public class OrganizationServiceTests
 {
+    private OrganizationService CreateService()
+    {
+        var repository = new FakeOrganizationRepository();
+
+        return new OrganizationService(repository);
+    }
+
     [Fact]
     public async Task CreateAsync_ShouldCreateOrganization()
     {
-        var service = new OrganizationService();
+        var service = CreateService();
 
         var result = await service.CreateAsync(new CreateOrganizationRequest
         {
@@ -25,7 +32,7 @@ public class OrganizationServiceTests
     [Fact]
     public async Task GetByIdAsync_ShouldReturnOrganization()
     {
-        var service = new OrganizationService();
+        var service = CreateService();
 
         var created = await service.CreateAsync(new CreateOrganizationRequest
         {
@@ -42,7 +49,7 @@ public class OrganizationServiceTests
     [Fact]
     public async Task GetAllAsync_ShouldReturnAllOrganizations()
     {
-        var service = new OrganizationService();
+        var service = CreateService();
 
         await service.CreateAsync(new CreateOrganizationRequest
         {
@@ -64,7 +71,7 @@ public class OrganizationServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldUpdateOrganization()
     {
-        var service = new OrganizationService();
+        var service = CreateService();
 
         var created = await service.CreateAsync(new CreateOrganizationRequest
         {
@@ -87,7 +94,7 @@ public class OrganizationServiceTests
     [Fact]
     public async Task DeactivateAsync_ShouldDeactivateOrganization()
     {
-        var service = new OrganizationService();
+        var service = CreateService();
 
         var created = await service.CreateAsync(new CreateOrganizationRequest
         {
