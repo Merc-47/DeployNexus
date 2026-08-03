@@ -17,6 +17,8 @@ public interface IUserService
 
     Task<IEnumerable<UserDto>> GetAllAsync();
 
+    Task<IEnumerable<UserDto>> GetInactiveUsersAsync();
+
     Task<UserDto?> UpdateAsync(Guid id, UpdateUserRequest request);
 
     Task<Result> DeactivateAsync(Guid id);

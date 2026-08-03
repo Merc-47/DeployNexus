@@ -57,6 +57,12 @@ public class UserService : IUserService
         return users.Select(MapToDto);
     }
 
+    public async Task<IEnumerable<UserDto>> GetInactiveUsersAsync()
+    {
+        var users = await _userRepository.GetInactiveUsersAsync();
+
+        return users.Select(MapToDto);
+    }
 
     public async Task<UserDto?> UpdateAsync(Guid id, UpdateUserRequest request)
     {
