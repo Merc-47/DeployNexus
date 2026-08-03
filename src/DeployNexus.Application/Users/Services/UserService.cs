@@ -26,7 +26,8 @@ public class UserService : IUserService
             Email = request.Email,
             FirstName = request.FirstName,
             LastName = request.LastName,
-            IsActive = true
+            IsActive = true,
+            OrganizationId = request.OrganizationId
         };
 
         await _userRepository.AddAsync(user);
@@ -77,6 +78,7 @@ public class UserService : IUserService
         user.Email = request.Email;
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
+        user.OrganizationId = request.OrganizationId;
 
         await _userRepository.UpdateAsync(user);
 
@@ -114,7 +116,8 @@ public class UserService : IUserService
             Email = user.Email,
             FirstName = user.FirstName,
             LastName = user.LastName,
-            IsActive = user.IsActive
+            IsActive = user.IsActive,
+            OrganizationId = user.OrganizationId
         };
     }
 }

@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DeployNexus.Domain.Common;
 
 namespace DeployNexus.Domain.Entities;
-
-using DeployNexus.Domain.Common;
 
 public class User : BaseEntity
 {
@@ -19,4 +13,8 @@ public class User : BaseEntity
     public string LastName { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
+
+    public Guid OrganizationId { get; set; }
+
+    public Organization Organization { get; set; } = null!;
 }
