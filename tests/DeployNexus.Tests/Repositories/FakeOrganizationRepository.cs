@@ -1,7 +1,7 @@
 ﻿using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Domain.Entities;
 
-namespace DeployNexus.Tests.Organizations;
+namespace DeployNexus.Tests.Repositories;
 
 public class FakeOrganizationRepository : IOrganizationRepository
 {
@@ -51,5 +51,12 @@ public class FakeOrganizationRepository : IOrganizationRepository
     public Task SaveChangesAsync()
     {
         return Task.CompletedTask;
+    }
+
+
+    // Helper method for tests
+    public void AddTestOrganization(Organization organization)
+    {
+        _organizations.Add(organization);
     }
 }
