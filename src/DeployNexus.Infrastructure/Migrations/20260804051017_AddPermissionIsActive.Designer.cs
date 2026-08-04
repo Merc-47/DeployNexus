@@ -4,6 +4,7 @@ using DeployNexus.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DeployNexus.Infrastructure.Migrations
 {
     [DbContext(typeof(DeployNexusDbContext))]
-    partial class DeployNexusDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260804051017_AddPermissionIsActive")]
+    partial class AddPermissionIsActive
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -5,6 +5,8 @@ using DeployNexus.Application.Organizations.Services;
 using Microsoft.Extensions.DependencyInjection;
 using DeployNexus.Application.Roles.Interfaces;
 using DeployNexus.Application.Roles.Services;
+using DeployNexus.Application.Permissions.Interfaces;
+using DeployNexus.Application.Permissions.Services;
 
 namespace DeployNexus.Application;
 
@@ -17,6 +19,8 @@ public static class DependencyInjection
         services.AddScoped<IOrganizationService, OrganizationService>();
 
         services.AddScoped<IRoleService, RoleService>();
+
+        services.AddScoped<IPermissionService, PermissionService>();
 
         return services;
     }

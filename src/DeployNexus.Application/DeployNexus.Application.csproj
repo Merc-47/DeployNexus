@@ -19,9 +19,6 @@
     <Folder Include="Modules\Interfaces\" />
     <Folder Include="Modules\DTOs\" />
     <Folder Include="Modules\Services\" />
-    <Folder Include="Permissions\Interfaces\" />
-    <Folder Include="Permissions\DTOs\" />
-    <Folder Include="Permissions\Services\" />
   </ItemGroup>
 
 </Project>

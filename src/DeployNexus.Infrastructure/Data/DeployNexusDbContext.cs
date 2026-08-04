@@ -18,6 +18,8 @@ public class DeployNexusDbContext : DbContext
 
     public DbSet<Role> Roles => Set<Role>();
 
+    public DbSet<Permission> Permissions => Set<Permission>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
