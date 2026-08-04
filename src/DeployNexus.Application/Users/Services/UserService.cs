@@ -9,16 +9,32 @@ namespace DeployNexus.Application.Users.Services;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IOrganizationRepository _organizationRepository;
 
 
-    public UserService(IUserRepository userRepository)
+    public UserService(
+    IUserRepository userRepository,
+    IOrganizationRepository organizationRepository)
     {
         _userRepository = userRepository;
+        _organizationRepository = organizationRepository;
     }
 
 
     public async Task<UserDto> CreateAsync(CreateUserRequest request)
     {
+        var organization = await _organizationRepository
+    .GetByIdAsync(request.OrganizationId);
+
+        if (organization == null)
+        {
+            throw new Exception("Organization not found");
+        }
+
+        if (!organization.IsActive)
+        {
+            throw new Exception("Organization is inactive");
+        }
         var user = new User
         {
             Id = Guid.NewGuid(),
@@ -73,6 +89,20 @@ public class UserService : IUserService
         {
             return null;
         }
+
+        var organization = await _organizationRepository
+            .GetByIdAsync(request.OrganizationId);
+
+        if (organization == null)
+        {
+            throw new Exception("Organization not found");
+        }
+
+        if (!organization.IsActive)
+        {
+            throw new Exception("Organization is inactive");
+        }
+
 
         user.Username = request.Username;
         user.Email = request.Email;

@@ -1,5 +1,6 @@
 ﻿using DeployNexus.Application.Organizations.DTOs;
 using DeployNexus.Application.Organizations.Services;
+using DeployNexus.Tests.Repositories;
 
 namespace DeployNexus.Tests.Organizations;
 
