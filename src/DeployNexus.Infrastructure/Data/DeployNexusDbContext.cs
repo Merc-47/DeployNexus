@@ -15,4 +15,16 @@ public class DeployNexusDbContext : DbContext
     public DbSet<User> Users { get; set; }
 
     public DbSet<Organization> Organizations { get; set; }
+
+    public DbSet<Role> Roles => Set<Role>();
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Role>()
+            .HasOne(r => r.Organization)
+            .WithMany(o => o.Roles)
+            .HasForeignKey(r => r.OrganizationId);
+    }
 }

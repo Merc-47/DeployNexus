@@ -22,9 +22,6 @@
     <Folder Include="Permissions\Interfaces\" />
     <Folder Include="Permissions\DTOs\" />
     <Folder Include="Permissions\Services\" />
-    <Folder Include="Roles\Interfaces\" />
-    <Folder Include="Roles\DTOs\" />
-    <Folder Include="Roles\Services\" />
   </ItemGroup>
 
 </Project>
