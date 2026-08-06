@@ -20,6 +20,8 @@ public class DeployNexusDbContext : DbContext
 
     public DbSet<Permission> Permissions => Set<Permission>();
 
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -28,5 +30,15 @@ public class DeployNexusDbContext : DbContext
             .HasOne(r => r.Organization)
             .WithMany(o => o.Roles)
             .HasForeignKey(r => r.OrganizationId);
+
+        modelBuilder.Entity<RolePermission>()
+            .HasOne(rp => rp.Role)
+            .WithMany(r => r.RolePermissions)
+            .HasForeignKey(rp => rp.RoleId);
+
+        modelBuilder.Entity<RolePermission>()
+            .HasOne(rp => rp.Permission)
+            .WithMany(p => p.RolePermissions)
+            .HasForeignKey(rp => rp.PermissionId);
     }
 }

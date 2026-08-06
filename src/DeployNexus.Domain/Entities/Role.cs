@@ -13,4 +13,7 @@ public class Role : BaseEntity
     public Guid OrganizationId { get; set; }
 
     public Organization Organization { get; set; } = null!;
+
+    public ICollection<RolePermission> RolePermissions { get; set; }
+        = new List<RolePermission>();
 }
