@@ -1,4 +1,5 @@
-﻿using DeployNexus.Application.Users.DTOs;
+﻿using DeployNexus.API.Authorization;
+using DeployNexus.Application.Users.DTOs;
 using DeployNexus.Application.Users.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +16,7 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
-
+    [RequirePermission("USER_VIEW")]
     [HttpGet]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetAll()
     {
@@ -24,6 +25,7 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
+    [RequirePermission("USER_VIEW")]
     [HttpGet("inactive")]
     public async Task<ActionResult<IEnumerable<UserDto>>> GetInactiveUsers()
     {
@@ -32,6 +34,7 @@ public class UsersController : ControllerBase
         return Ok(users);
     }
 
+    [RequirePermission("USER_VIEW")]
     [HttpGet("{id}")]
     public async Task<ActionResult<UserDto>> GetById(Guid id)
     {
@@ -43,9 +46,9 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
-
+    [RequirePermission("USER_CREATE")]
     [HttpPost]
-    public async Task<ActionResult<UserDto>> Create(CreateUserRequest request)
+    public async Task<IActionResult> Create(CreateUserRequest request)
     {
         var user = await _userService.CreateAsync(request);
 
@@ -56,8 +59,11 @@ public class UsersController : ControllerBase
         );
     }
 
+    [RequirePermission("USER_UPDATE")]
     [HttpPut("{id}")]
-    public async Task<ActionResult<UserDto>> Update(Guid id, UpdateUserRequest request)
+    public async Task<ActionResult<UserDto>> Update(
+        Guid id,
+        UpdateUserRequest request)
     {
         var user = await _userService.UpdateAsync(id, request);
 
@@ -69,6 +75,7 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
+    [RequirePermission("USER_DELETE")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Deactivate(Guid id)
     {

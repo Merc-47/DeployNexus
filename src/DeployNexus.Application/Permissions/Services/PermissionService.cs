@@ -132,4 +132,12 @@ public class PermissionService : IPermissionService
             IsActive = permission.IsActive
         };
     }
+
+    public async Task<bool> HasPermissionAsync(
+    Guid userId,
+    string permissionCode)
+    {
+        return await _permissionRepository
+            .UserHasPermissionAsync(userId, permissionCode);
+    }
 }

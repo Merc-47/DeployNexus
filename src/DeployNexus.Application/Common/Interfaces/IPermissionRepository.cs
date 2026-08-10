@@ -13,4 +13,8 @@ public interface IPermissionRepository
     Task UpdateAsync(Permission permission);
 
     Task SaveChangesAsync();
+
+    Task<bool> UserHasPermissionAsync(
+        Guid userId,
+        string permissionCode);
 }

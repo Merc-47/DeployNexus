@@ -2,6 +2,7 @@
 using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Application.Users.DTOs;
 using DeployNexus.Application.Users.Interfaces;
+using DeployNexus.Application.Authentication.Interfaces;
 using DeployNexus.Domain.Entities;
 
 namespace DeployNexus.Application.Users.Services;
@@ -10,14 +11,17 @@ public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IOrganizationRepository _organizationRepository;
+    private readonly IPasswordHasher _passwordHasher;
 
 
     public UserService(
     IUserRepository userRepository,
-    IOrganizationRepository organizationRepository)
+    IOrganizationRepository organizationRepository,
+    IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
         _organizationRepository = organizationRepository;
+        _passwordHasher = passwordHasher;
     }
 
 
@@ -40,6 +44,7 @@ public class UserService : IUserService
             Id = Guid.NewGuid(),
             Username = request.Username,
             Email = request.Email,
+            PasswordHash = _passwordHasher.Hash(request.Password),
             FirstName = request.FirstName,
             LastName = request.LastName,
             IsActive = true,
