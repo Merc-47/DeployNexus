@@ -11,6 +11,8 @@ public interface IUserRepository
 
     Task<IEnumerable<User>> GetInactiveUsersAsync();
 
+    Task<User?> GetByUsernameAsync(string username);
+
     Task UpdateAsync(User user);
 
     Task SaveChangesAsync();

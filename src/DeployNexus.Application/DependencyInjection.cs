@@ -2,13 +2,16 @@
 using DeployNexus.Application.Users.Services;
 using DeployNexus.Application.Organizations.Interfaces;
 using DeployNexus.Application.Organizations.Services;
-using Microsoft.Extensions.DependencyInjection;
 using DeployNexus.Application.Roles.Interfaces;
 using DeployNexus.Application.Roles.Services;
 using DeployNexus.Application.Permissions.Interfaces;
 using DeployNexus.Application.Permissions.Services;
 using DeployNexus.Application.RolePermissions.Interfaces;
 using DeployNexus.Application.RolePermissions.Services;
+using Microsoft.Extensions.DependencyInjection;
+using DeployNexus.Application.Authentication.Interfaces;
+using DeployNexus.Application.Authentication.Services;
+
 
 namespace DeployNexus.Application;
 
@@ -25,6 +28,8 @@ public static class DependencyInjection
         services.AddScoped<IPermissionService, PermissionService>();
 
         services.AddScoped<IRolePermissionService, RolePermissionService>();
+
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
