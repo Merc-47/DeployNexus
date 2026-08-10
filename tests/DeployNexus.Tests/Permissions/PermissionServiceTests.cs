@@ -174,4 +174,52 @@ public class PermissionServiceTests
         Assert.NotNull(permission);
         Assert.False(permission.IsActive);
     }
+    [Fact]
+    public async Task HasPermissionAsync_WhenUserHasPermission_ReturnsTrue()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+
+        var repository = new FakePermissionRepository();
+
+        repository.SetUserPermission(
+            userId,
+            "USER_CREATE",
+            true);
+
+        var service = new PermissionService(repository);
+
+        // Act
+        var result = await service.HasPermissionAsync(
+            userId,
+            "USER_CREATE");
+
+        // Assert
+        Assert.True(result);
+    }
+
+
+    [Fact]
+    public async Task HasPermissionAsync_WhenUserDoesNotHavePermission_ReturnsFalse()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+
+        var repository = new FakePermissionRepository();
+
+        repository.SetUserPermission(
+            userId,
+            "USER_CREATE",
+            false);
+
+        var service = new PermissionService(repository);
+
+        // Act
+        var result = await service.HasPermissionAsync(
+            userId,
+            "USER_CREATE");
+
+        // Assert
+        Assert.False(result);
+    }
 }

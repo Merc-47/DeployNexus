@@ -51,4 +51,20 @@ public class PermissionRepository : IPermissionRepository
     {
         await _context.SaveChangesAsync();
     }
+
+    public async Task<bool> UserHasPermissionAsync(
+        Guid userId,
+        string permissionCode)
+    {
+        return await _context.Users
+            .Where(u =>
+                u.Id == userId &&
+                u.IsActive &&
+                u.Role != null &&
+                u.Role.IsActive)
+            .SelectMany(u => u.Role!.RolePermissions)
+            .AnyAsync(rp =>
+                rp.Permission.IsActive &&
+                rp.Permission.Code == permissionCode);
+    }
 }

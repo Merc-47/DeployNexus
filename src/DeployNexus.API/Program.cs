@@ -1,7 +1,9 @@
 using System.Text;
+using DeployNexus.API.Authorization;
 using DeployNexus.Application;
 using DeployNexus.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -73,6 +75,12 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
+
+builder.Services.AddScoped<IAuthorizationHandler,
+    PermissionAuthorizationHandler>();
+
+builder.Services.AddSingleton<IAuthorizationPolicyProvider,
+    PermissionPolicyProvider>();
 
 var app = builder.Build();
 
