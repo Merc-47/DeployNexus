@@ -236,4 +236,133 @@ public class RoleServiceTests
         Assert.NotNull(role);
         Assert.False(role.IsActive);
     }
+
+
+    [Fact]
+    public async Task CreateAsync_ShouldFail_WhenOrganizationDoesNotExist()
+    {
+        // Arrange
+        var roleRepository = new FakeRoleRepository();
+        var organizationRepository = new FakeOrganizationRepository();
+
+        var service = new RoleService(
+            roleRepository,
+            organizationRepository);
+
+        var request = new CreateRoleRequest
+        {
+            Name = "Administrator",
+            Description = "Full system access",
+            OrganizationId = Guid.NewGuid()
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Exception>(
+            () => service.CreateAsync(request));
+    }
+
+
+    [Fact]
+    public async Task CreateAsync_ShouldFail_WhenOrganizationIsInactive()
+    {
+        // Arrange
+        var roleRepository = new FakeRoleRepository();
+        var organizationRepository = new FakeOrganizationRepository();
+
+        var service = new RoleService(
+            roleRepository,
+            organizationRepository);
+
+        var organization = new Domain.Entities.Organization
+        {
+            Id = Guid.NewGuid(),
+            Name = "Inactive Organization",
+            Code = "INACTIVE",
+            IsActive = false
+        };
+
+        await organizationRepository.AddAsync(organization);
+
+        var request = new CreateRoleRequest
+        {
+            Name = "Administrator",
+            Description = "Full system access",
+            OrganizationId = organization.Id
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Exception>(
+            () => service.CreateAsync(request));
+    }
+
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnNull_WhenRoleDoesNotExist()
+    {
+        // Arrange
+        var roleRepository = new FakeRoleRepository();
+        var organizationRepository = new FakeOrganizationRepository();
+
+        var service = new RoleService(
+            roleRepository,
+            organizationRepository);
+
+        var roleId = Guid.NewGuid();
+
+        // Act
+        var result = await service.GetByIdAsync(roleId);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+
+    [Fact]
+    public async Task UpdateAsync_ShouldReturnNull_WhenRoleDoesNotExist()
+    {
+        // Arrange
+        var roleRepository = new FakeRoleRepository();
+        var organizationRepository = new FakeOrganizationRepository();
+
+        var service = new RoleService(
+            roleRepository,
+            organizationRepository);
+
+        var roleId = Guid.NewGuid();
+
+        var request = new UpdateRoleRequest
+        {
+            Name = "Updated Role",
+            Description = "Updated Description"
+        };
+
+        // Act
+        var result = await service.UpdateAsync(
+            roleId,
+            request);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+
+    [Fact]
+    public async Task DeactivateAsync_ShouldFail_WhenRoleDoesNotExist()
+    {
+        // Arrange
+        var roleRepository = new FakeRoleRepository();
+        var organizationRepository = new FakeOrganizationRepository();
+
+        var service = new RoleService(
+            roleRepository,
+            organizationRepository);
+
+        var roleId = Guid.NewGuid();
+
+        // Act
+        var result = await service.DeactivateAsync(roleId);
+
+        // Assert
+        Assert.False(result.Success);
+    }
 }
