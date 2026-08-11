@@ -7,6 +7,9 @@ public class FakePermissionRepository : IPermissionRepository
 {
     private readonly List<Permission> _permissions = new();
 
+    private readonly Dictionary<(Guid UserId, string PermissionCode), bool>
+        _userPermissions = new();
+
 
     public Task<Permission> AddAsync(Permission permission)
     {
@@ -37,14 +40,12 @@ public class FakePermissionRepository : IPermissionRepository
         var existing = _permissions
             .FirstOrDefault(x => x.Id == permission.Id);
 
-
         if (existing != null)
         {
             existing.Name = permission.Name;
             existing.Code = permission.Code;
             existing.IsActive = permission.IsActive;
         }
-
 
         return Task.CompletedTask;
     }
@@ -53,5 +54,28 @@ public class FakePermissionRepository : IPermissionRepository
     public Task SaveChangesAsync()
     {
         return Task.CompletedTask;
+    }
+
+
+    public Task<bool> UserHasPermissionAsync(
+        Guid userId,
+        string permissionCode)
+    {
+        var result = _userPermissions.TryGetValue(
+            (userId, permissionCode),
+            out var hasPermission)
+            && hasPermission;
+
+        return Task.FromResult(result);
+    }
+
+
+    public void SetUserPermission(
+        Guid userId,
+        string permissionCode,
+        bool hasPermission)
+    {
+        _userPermissions[(userId, permissionCode)]
+            = hasPermission;
     }
 }

@@ -1,6 +1,7 @@
 ﻿using DeployNexus.Application.Users.DTOs;
 using DeployNexus.Application.Users.Services;
 using DeployNexus.Domain.Entities;
+using DeployNexus.Tests.Authentication;
 using DeployNexus.Tests.Repositories;
 
 namespace DeployNexus.Tests.Users;
@@ -35,10 +36,12 @@ public class UserServiceTests
         var organizationRepository =
             CreateOrganizationRepository(out var organization);
 
+        var passwordHasher = new FakePasswordHasher();
+
         var service = new UserService(
             userRepository,
-            organizationRepository
-        );
+            organizationRepository,
+            passwordHasher);
 
 
         var request = new CreateUserRequest
@@ -73,10 +76,12 @@ public class UserServiceTests
         var organizationRepository =
             CreateOrganizationRepository(out var organization);
 
+        var passwordHasher = new FakePasswordHasher();
+
         var service = new UserService(
             userRepository,
-            organizationRepository
-        );
+            organizationRepository,
+            passwordHasher);
 
 
         var createdUser = await service.CreateAsync(new CreateUserRequest
@@ -109,10 +114,12 @@ public class UserServiceTests
         var organizationRepository =
             CreateOrganizationRepository(out var organization);
 
+        var passwordHasher = new FakePasswordHasher();
+
         var service = new UserService(
             userRepository,
-            organizationRepository
-        );
+            organizationRepository,
+            passwordHasher);
 
 
         await service.CreateAsync(new CreateUserRequest
@@ -154,10 +161,12 @@ public class UserServiceTests
         var organizationRepository =
             CreateOrganizationRepository(out var organization);
 
+        var passwordHasher = new FakePasswordHasher();
+
         var service = new UserService(
             userRepository,
-            organizationRepository
-        );
+            organizationRepository,
+            passwordHasher);
 
 
         var createdUser = await service.CreateAsync(new CreateUserRequest
@@ -203,10 +212,12 @@ public class UserServiceTests
         var organizationRepository =
             CreateOrganizationRepository(out var organization);
 
+        var passwordHasher = new FakePasswordHasher();
+
         var service = new UserService(
             userRepository,
-            organizationRepository
-        );
+            organizationRepository,
+            passwordHasher);
 
 
         var user = await service.CreateAsync(new CreateUserRequest

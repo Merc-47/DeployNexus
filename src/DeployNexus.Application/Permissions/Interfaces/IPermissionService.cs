@@ -16,4 +16,8 @@ public interface IPermissionService
         UpdatePermissionRequest request);
 
     Task<Result> DeactivateAsync(Guid id);
+
+    Task<bool> HasPermissionAsync(
+    Guid userId,
+    string permissionCode);
 }

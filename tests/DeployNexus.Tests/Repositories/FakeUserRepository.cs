@@ -35,6 +35,14 @@ public class FakeUserRepository : IUserRepository
             _users.Where(x => !x.IsActive)
         );
     }
+
+    public Task<User?> GetByUsernameAsync(string username)
+    {
+        var user = _users.FirstOrDefault(x => x.Username == username);
+
+        return Task.FromResult(user);
+    }
+
     public Task UpdateAsync(User user)
     {
         var existingUser = _users.FirstOrDefault(x => x.Id == user.Id);
