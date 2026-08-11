@@ -1,4 +1,5 @@
-﻿using DeployNexus.Application.Roles.DTOs;
+﻿using DeployNexus.API.Authorization;
+using DeployNexus.Application.Roles.DTOs;
 using DeployNexus.Application.Roles.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,13 +11,12 @@ public class RolesController : ControllerBase
 {
     private readonly IRoleService _roleService;
 
-
     public RolesController(IRoleService roleService)
     {
         _roleService = roleService;
     }
 
-
+    [RequirePermission("ROLE_CREATE")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateRoleRequest request)
     {
@@ -28,7 +28,7 @@ public class RolesController : ControllerBase
             result);
     }
 
-
+    [RequirePermission("ROLE_VIEW")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -37,7 +37,7 @@ public class RolesController : ControllerBase
         return Ok(roles);
     }
 
-
+    [RequirePermission("ROLE_VIEW")]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -51,7 +51,7 @@ public class RolesController : ControllerBase
         return Ok(role);
     }
 
-
+    [RequirePermission("ROLE_UPDATE")]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(
         Guid id,
@@ -67,7 +67,7 @@ public class RolesController : ControllerBase
         return Ok(result);
     }
 
-
+    [RequirePermission("ROLE_DELETE")]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Deactivate(Guid id)
     {
