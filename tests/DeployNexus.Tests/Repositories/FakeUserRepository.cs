@@ -49,9 +49,9 @@ public class FakeUserRepository : IUserRepository
 
 
     public Task<bool> ExistsByUsernameAsync(
-    Guid organizationId,
-    string username,
-    Guid? excludeUserId = null)
+        Guid organizationId,
+        string username,
+        Guid? excludeUserId = null)
     {
         var exists = _users.Any(x =>
             x.OrganizationId == organizationId &&
@@ -64,9 +64,9 @@ public class FakeUserRepository : IUserRepository
 
 
     public Task<bool> ExistsByEmailAsync(
-     Guid organizationId,
-     string email,
-     Guid? excludeUserId = null)
+        Guid organizationId,
+        string email,
+        Guid? excludeUserId = null)
     {
         var exists = _users.Any(x =>
             x.OrganizationId == organizationId &&
@@ -91,6 +91,9 @@ public class FakeUserRepository : IUserRepository
             existingUser.LastName = user.LastName;
             existingUser.IsActive = user.IsActive;
             existingUser.OrganizationId = user.OrganizationId;
+
+            // Important for User ↔ Role management
+            existingUser.RoleId = user.RoleId;
         }
 
         return Task.CompletedTask;

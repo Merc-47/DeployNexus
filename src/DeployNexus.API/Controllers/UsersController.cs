@@ -16,56 +16,40 @@ public class UsersController : ControllerBase
         _userService = userService;
     }
 
+    // CREATE USER
+
+    [RequirePermission("USER_CREATE")]
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        CreateUserRequest request)
+    {
+        var result = await _userService.CreateAsync(request);
+
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = result.Id },
+            result);
+    }
+
+    // GET ALL USERS
+
     [RequirePermission("USER_VIEW")]
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetAll()
+    public async Task<IActionResult> GetAll()
     {
         var users = await _userService.GetAllAsync();
 
         return Ok(users);
     }
 
-    [RequirePermission("USER_VIEW")]
-    [HttpGet("inactive")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetInactiveUsers()
-    {
-        var users = await _userService.GetInactiveUsersAsync();
-
-        return Ok(users);
-    }
+    // GET USER BY ID
 
     [RequirePermission("USER_VIEW")]
     [HttpGet("{id}")]
-    public async Task<ActionResult<UserDto>> GetById(Guid id)
+    public async Task<IActionResult> GetById(
+        Guid id)
     {
         var user = await _userService.GetByIdAsync(id);
-
-        if (user == null)
-            return NotFound();
-
-        return Ok(user);
-    }
-
-    [RequirePermission("USER_CREATE")]
-    [HttpPost]
-    public async Task<IActionResult> Create(CreateUserRequest request)
-    {
-        var user = await _userService.CreateAsync(request);
-
-        return CreatedAtAction(
-            nameof(GetById),
-            new { id = user.Id },
-            user
-        );
-    }
-
-    [RequirePermission("USER_UPDATE")]
-    [HttpPut("{id}")]
-    public async Task<ActionResult<UserDto>> Update(
-        Guid id,
-        UpdateUserRequest request)
-    {
-        var user = await _userService.UpdateAsync(id, request);
 
         if (user == null)
         {
@@ -75,15 +59,78 @@ public class UsersController : ControllerBase
         return Ok(user);
     }
 
+    // GET INACTIVE USERS
+
+    [RequirePermission("USER_VIEW")]
+    [HttpGet("inactive")]
+    public async Task<IActionResult> GetInactiveUsers()
+    {
+        var users = await _userService.GetInactiveUsersAsync();
+
+        return Ok(users);
+    }
+
+    // UPDATE USER
+
+    [RequirePermission("USER_UPDATE")]
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(
+        Guid id,
+        UpdateUserRequest request)
+    {
+        var result = await _userService.UpdateAsync(
+            id,
+            request);
+
+        if (result == null)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
+    // ASSIGN / REMOVE USER ROLE
+
+    [RequirePermission("USER_ROLE_ASSIGN")]
+    [HttpPut("{id}/role")]
+    public async Task<IActionResult> AssignRole(
+    Guid id,
+    AssignUserRoleRequest request)
+    {
+        try
+        {
+            var result = await _userService.AssignRoleAsync(
+                id,
+                request);
+
+            if (result == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new
+            {
+                message = ex.Message
+            });
+        }
+    }
+    // DEACTIVATE USER
+
     [RequirePermission("USER_DELETE")]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> Deactivate(Guid id)
+    public async Task<IActionResult> Deactivate(
+        Guid id)
     {
         var result = await _userService.DeactivateAsync(id);
 
         if (!result.Success)
         {
-            return NotFound(result.Message);
+            return NotFound(result);
         }
 
         return NoContent();

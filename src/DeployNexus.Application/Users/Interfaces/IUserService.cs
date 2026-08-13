@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DeployNexus.Application.Common;
+using DeployNexus.Application.Users.DTOs;
 
 namespace DeployNexus.Application.Users.Interfaces;
-
-using DeployNexus.Application.Common;
-using DeployNexus.Application.Users.DTOs;
 
 public interface IUserService
 {
@@ -19,7 +13,13 @@ public interface IUserService
 
     Task<IEnumerable<UserDto>> GetInactiveUsersAsync();
 
-    Task<UserDto?> UpdateAsync(Guid id, UpdateUserRequest request);
+    Task<UserDto?> UpdateAsync(
+        Guid id,
+        UpdateUserRequest request);
+
+    Task<UserDto?> AssignRoleAsync(
+        Guid userId,
+        AssignUserRoleRequest request);
 
     Task<Result> DeactivateAsync(Guid id);
 }

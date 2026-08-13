@@ -11,16 +11,19 @@ public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
     private readonly IOrganizationRepository _organizationRepository;
+    private readonly IRoleRepository _roleRepository;
     private readonly IPasswordHasher _passwordHasher;
 
 
     public UserService(
         IUserRepository userRepository,
         IOrganizationRepository organizationRepository,
+        IRoleRepository roleRepository,
         IPasswordHasher passwordHasher)
     {
         _userRepository = userRepository;
         _organizationRepository = organizationRepository;
+        _roleRepository = roleRepository;
         _passwordHasher = passwordHasher;
     }
 
@@ -41,7 +44,6 @@ public class UserService : IUserService
         }
 
 
-        // Username must be unique within the organization.
         var usernameExists = await _userRepository
             .ExistsByUsernameAsync(
                 request.OrganizationId,
@@ -54,7 +56,6 @@ public class UserService : IUserService
         }
 
 
-        // Email must be unique within the organization.
         var emailExists = await _userRepository
             .ExistsByEmailAsync(
                 request.OrganizationId,
@@ -76,7 +77,8 @@ public class UserService : IUserService
             FirstName = request.FirstName,
             LastName = request.LastName,
             IsActive = true,
-            OrganizationId = request.OrganizationId
+            OrganizationId = request.OrganizationId,
+            RoleId = null
         };
 
 
@@ -90,8 +92,7 @@ public class UserService : IUserService
 
     public async Task<UserDto?> GetByIdAsync(Guid id)
     {
-        var user = await _userRepository
-            .GetByIdAsync(id);
+        var user = await _userRepository.GetByIdAsync(id);
 
         if (user == null)
         {
@@ -104,8 +105,7 @@ public class UserService : IUserService
 
     public async Task<IEnumerable<UserDto>> GetAllAsync()
     {
-        var users = await _userRepository
-            .GetAllAsync();
+        var users = await _userRepository.GetAllAsync();
 
         return users.Select(MapToDto);
     }
@@ -124,8 +124,7 @@ public class UserService : IUserService
         Guid id,
         UpdateUserRequest request)
     {
-        var user = await _userRepository
-            .GetByIdAsync(id);
+        var user = await _userRepository.GetByIdAsync(id);
 
         if (user == null)
         {
@@ -156,8 +155,7 @@ public class UserService : IUserService
             var usernameExists = await _userRepository
                 .ExistsByUsernameAsync(
                     request.OrganizationId,
-                    request.Username,
-                    id);
+                    request.Username);
 
             if (usernameExists)
             {
@@ -176,8 +174,7 @@ public class UserService : IUserService
             var emailExists = await _userRepository
                 .ExistsByEmailAsync(
                     request.OrganizationId,
-                    request.Email,
-                    id);
+                    request.Email);
 
             if (emailExists)
             {
@@ -194,11 +191,59 @@ public class UserService : IUserService
         user.OrganizationId = request.OrganizationId;
 
 
-        await _userRepository
-            .UpdateAsync(user);
+        await _userRepository.UpdateAsync(user);
 
-        await _userRepository
-            .SaveChangesAsync();
+        await _userRepository.SaveChangesAsync();
+
+        return MapToDto(user);
+    }
+
+
+    public async Task<UserDto?> AssignRoleAsync(
+     Guid userId,
+     AssignUserRoleRequest request)
+    {
+        var user = await _userRepository.GetByIdAsync(userId);
+
+        if (user == null)
+        {
+            return null;
+        }
+
+        // Null RoleId means remove the user's role.
+        if (request.RoleId == null)
+        {
+            user.RoleId = null;
+
+            await _userRepository.UpdateAsync(user);
+            await _userRepository.SaveChangesAsync();
+
+            return MapToDto(user);
+        }
+
+        var role = await _roleRepository
+            .GetByIdAsync(request.RoleId.Value);
+
+        if (role == null)
+        {
+            throw new Exception("Role not found");
+        }
+
+        if (!role.IsActive)
+        {
+            throw new Exception("Role is inactive");
+        }
+
+        if (role.OrganizationId != user.OrganizationId)
+        {
+            throw new Exception(
+                "Role does not belong to the user's organization");
+        }
+
+        user.RoleId = role.Id;
+
+        await _userRepository.UpdateAsync(user);
+        await _userRepository.SaveChangesAsync();
 
         return MapToDto(user);
     }
@@ -206,23 +251,19 @@ public class UserService : IUserService
 
     public async Task<Result> DeactivateAsync(Guid id)
     {
-        var user = await _userRepository
-            .GetByIdAsync(id);
+        var user = await _userRepository.GetByIdAsync(id);
 
         if (user == null)
         {
-            return Result.Failure(
-                "User not found");
+            return Result.Failure("User not found");
         }
 
 
         user.IsActive = false;
 
-        await _userRepository
-            .UpdateAsync(user);
+        await _userRepository.UpdateAsync(user);
 
-        await _userRepository
-            .SaveChangesAsync();
+        await _userRepository.SaveChangesAsync();
 
         return Result.Ok();
     }
@@ -238,7 +279,8 @@ public class UserService : IUserService
             FirstName = user.FirstName,
             LastName = user.LastName,
             IsActive = user.IsActive,
-            OrganizationId = user.OrganizationId
+            OrganizationId = user.OrganizationId,
+            RoleId = user.RoleId
         };
     }
 }
