@@ -1,4 +1,5 @@
-﻿using DeployNexus.Application.RolePermissions.DTOs;
+﻿using DeployNexus.API.Authorization;
+using DeployNexus.Application.RolePermissions.DTOs;
 using DeployNexus.Application.RolePermissions.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,14 +11,13 @@ public class RolePermissionsController : ControllerBase
 {
     private readonly IRolePermissionService _rolePermissionService;
 
-
     public RolePermissionsController(
         IRolePermissionService rolePermissionService)
     {
         _rolePermissionService = rolePermissionService;
     }
 
-
+    [RequirePermission("ROLE_PERMISSION_ASSIGN")]
     [HttpPost]
     public async Task<IActionResult> Assign(
         Guid roleId,
@@ -32,8 +32,7 @@ public class RolePermissionsController : ControllerBase
             result);
     }
 
-
-
+    [RequirePermission("ROLE_PERMISSION_VIEW")]
     [HttpGet]
     public async Task<IActionResult> GetPermissions(
         Guid roleId)
@@ -44,8 +43,7 @@ public class RolePermissionsController : ControllerBase
         return Ok(result);
     }
 
-
-
+    [RequirePermission("ROLE_PERMISSION_REMOVE")]
     [HttpDelete("{permissionId}")]
     public async Task<IActionResult> Remove(
         Guid roleId,
@@ -54,12 +52,10 @@ public class RolePermissionsController : ControllerBase
         var result = await _rolePermissionService
             .RemoveAsync(roleId, permissionId);
 
-
         if (!result)
         {
             return NotFound();
         }
-
 
         return NoContent();
     }
