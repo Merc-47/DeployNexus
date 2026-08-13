@@ -10,6 +10,10 @@ public interface IRoleRepository
 
     Task<IEnumerable<Role>> GetAllAsync();
 
+    Task<bool> ExistsByNameAsync(
+        Guid organizationId,
+        string name);
+
     Task UpdateAsync(Role role);
 
     Task SaveChangesAsync();

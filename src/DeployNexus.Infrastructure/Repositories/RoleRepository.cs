@@ -37,6 +37,17 @@ public class RoleRepository : IRoleRepository
     }
 
 
+    public async Task<bool> ExistsByNameAsync(
+        Guid organizationId,
+        string name)
+    {
+        return await _context.Roles
+            .AnyAsync(x =>
+                x.OrganizationId == organizationId &&
+                x.Name == name);
+    }
+
+
     public Task UpdateAsync(Role role)
     {
         _context.Roles.Update(role);

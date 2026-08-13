@@ -365,4 +365,108 @@ public class RoleServiceTests
         // Assert
         Assert.False(result.Success);
     }
+
+    [Fact]
+    public async Task CreateAsync_ShouldFail_WhenRoleNameAlreadyExistsInOrganization()
+    {
+        // Arrange
+        var roleRepository = new FakeRoleRepository();
+        var organizationRepository = new FakeOrganizationRepository();
+
+        var service = new RoleService(
+            roleRepository,
+            organizationRepository);
+
+        var organization = new Domain.Entities.Organization
+        {
+            Id = Guid.NewGuid(),
+            Name = "DeployNexus",
+            Code = "DNX",
+            IsActive = true
+        };
+
+        await organizationRepository.AddAsync(organization);
+
+        var request = new CreateRoleRequest
+        {
+            Name = "Administrator",
+            Description = "Full system access",
+            OrganizationId = organization.Id
+        };
+
+        // Create the first role
+        await service.CreateAsync(request);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<Exception>(
+            () => service.CreateAsync(request));
+    }
+
+
+    [Fact]
+    public async Task CreateAsync_ShouldAllowSameRoleNameInDifferentOrganizations()
+    {
+        // Arrange
+        var roleRepository = new FakeRoleRepository();
+        var organizationRepository = new FakeOrganizationRepository();
+
+        var service = new RoleService(
+            roleRepository,
+            organizationRepository);
+
+        var organization1 = new Domain.Entities.Organization
+        {
+            Id = Guid.NewGuid(),
+            Name = "Organization One",
+            Code = "ORG1",
+            IsActive = true
+        };
+
+        var organization2 = new Domain.Entities.Organization
+        {
+            Id = Guid.NewGuid(),
+            Name = "Organization Two",
+            Code = "ORG2",
+            IsActive = true
+        };
+
+        await organizationRepository.AddAsync(organization1);
+        await organizationRepository.AddAsync(organization2);
+
+        // Act
+        var role1 = await service.CreateAsync(
+            new CreateRoleRequest
+            {
+                Name = "Administrator",
+                Description = "Admin for Organization One",
+                OrganizationId = organization1.Id
+            });
+
+        var role2 = await service.CreateAsync(
+            new CreateRoleRequest
+            {
+                Name = "Administrator",
+                Description = "Admin for Organization Two",
+                OrganizationId = organization2.Id
+            });
+
+        // Assert
+        Assert.NotNull(role1);
+        Assert.NotNull(role2);
+
+        Assert.Equal("Administrator", role1.Name);
+        Assert.Equal("Administrator", role2.Name);
+
+        Assert.Equal(
+            organization1.Id,
+            role1.OrganizationId);
+
+        Assert.Equal(
+            organization2.Id,
+            role2.OrganizationId);
+
+        Assert.NotEqual(
+            role1.Id,
+            role2.Id);
+    }
 }
