@@ -68,6 +68,104 @@ public class UserServiceTests
 
 
     [Fact]
+    public async Task CreateAsync_ShouldRejectDuplicateUsername()
+    {
+        // Arrange
+        var userRepository = new FakeUserRepository();
+
+        var organizationRepository =
+            CreateOrganizationRepository(out var organization);
+
+        var passwordHasher = new FakePasswordHasher();
+
+        var service = new UserService(
+            userRepository,
+            organizationRepository,
+            passwordHasher);
+
+
+        await service.CreateAsync(new CreateUserRequest
+        {
+            Username = "jason",
+            Email = "jason@test.com",
+            FirstName = "Jason",
+            LastName = "Broody",
+            OrganizationId = organization.Id
+        });
+
+
+        var duplicateRequest = new CreateUserRequest
+        {
+            Username = "jason",
+            Email = "another@test.com",
+            FirstName = "Another",
+            LastName = "User",
+            OrganizationId = organization.Id
+        };
+
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(
+            () => service.CreateAsync(duplicateRequest));
+
+
+        // Assert
+        Assert.Equal(
+            "A user with this username already exists",
+            exception.Message);
+    }
+
+
+    [Fact]
+    public async Task CreateAsync_ShouldRejectDuplicateEmail()
+    {
+        // Arrange
+        var userRepository = new FakeUserRepository();
+
+        var organizationRepository =
+            CreateOrganizationRepository(out var organization);
+
+        var passwordHasher = new FakePasswordHasher();
+
+        var service = new UserService(
+            userRepository,
+            organizationRepository,
+            passwordHasher);
+
+
+        await service.CreateAsync(new CreateUserRequest
+        {
+            Username = "jason",
+            Email = "jason@test.com",
+            FirstName = "Jason",
+            LastName = "Broody",
+            OrganizationId = organization.Id
+        });
+
+
+        var duplicateRequest = new CreateUserRequest
+        {
+            Username = "another",
+            Email = "jason@test.com",
+            FirstName = "Another",
+            LastName = "User",
+            OrganizationId = organization.Id
+        };
+
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(
+            () => service.CreateAsync(duplicateRequest));
+
+
+        // Assert
+        Assert.Equal(
+            "A user with this email already exists",
+            exception.Message);
+    }
+
+
+    [Fact]
     public async Task GetByIdAsync_ShouldReturnUser_WhenUserExists()
     {
         // Arrange
@@ -84,14 +182,15 @@ public class UserServiceTests
             passwordHasher);
 
 
-        var createdUser = await service.CreateAsync(new CreateUserRequest
-        {
-            Username = "jason",
-            Email = "jason@test.com",
-            FirstName = "Jason",
-            LastName = "Broody",
-            OrganizationId = organization.Id
-        });
+        var createdUser = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "jason",
+                Email = "jason@test.com",
+                FirstName = "Jason",
+                LastName = "Broody",
+                OrganizationId = organization.Id
+            });
 
 
         // Act
@@ -169,14 +268,15 @@ public class UserServiceTests
             passwordHasher);
 
 
-        var createdUser = await service.CreateAsync(new CreateUserRequest
-        {
-            Username = "jason",
-            Email = "old@test.com",
-            FirstName = "Jason",
-            LastName = "Old",
-            OrganizationId = organization.Id
-        });
+        var createdUser = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "jason",
+                Email = "old@test.com",
+                FirstName = "Jason",
+                LastName = "Old",
+                OrganizationId = organization.Id
+            });
 
 
         var updateRequest = new UpdateUserRequest
@@ -204,6 +304,234 @@ public class UserServiceTests
 
 
     [Fact]
+    public async Task UpdateAsync_ShouldRejectDuplicateUsername()
+    {
+        // Arrange
+        var userRepository = new FakeUserRepository();
+
+        var organizationRepository =
+            CreateOrganizationRepository(out var organization);
+
+        var passwordHasher = new FakePasswordHasher();
+
+        var service = new UserService(
+            userRepository,
+            organizationRepository,
+            passwordHasher);
+
+
+        var firstUser = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "jason",
+                Email = "jason@test.com",
+                FirstName = "Jason",
+                LastName = "Broody",
+                OrganizationId = organization.Id
+            });
+
+
+        var secondUser = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "admin",
+                Email = "admin@test.com",
+                FirstName = "Admin",
+                LastName = "User",
+                OrganizationId = organization.Id
+            });
+
+
+        var updateRequest = new UpdateUserRequest
+        {
+            Username = firstUser.Username,
+            Email = secondUser.Email,
+            FirstName = "Admin",
+            LastName = "Updated",
+            OrganizationId = organization.Id
+        };
+
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(
+            () => service.UpdateAsync(
+                secondUser.Id,
+                updateRequest));
+
+
+        // Assert
+        Assert.Equal(
+            "A user with this username already exists",
+            exception.Message);
+    }
+
+
+    [Fact]
+    public async Task UpdateAsync_ShouldRejectDuplicateEmail()
+    {
+        // Arrange
+        var userRepository = new FakeUserRepository();
+
+        var organizationRepository =
+            CreateOrganizationRepository(out var organization);
+
+        var passwordHasher = new FakePasswordHasher();
+
+        var service = new UserService(
+            userRepository,
+            organizationRepository,
+            passwordHasher);
+
+
+        var firstUser = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "jason",
+                Email = "jason@test.com",
+                FirstName = "Jason",
+                LastName = "Broody",
+                OrganizationId = organization.Id
+            });
+
+
+        var secondUser = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "admin",
+                Email = "admin@test.com",
+                FirstName = "Admin",
+                LastName = "User",
+                OrganizationId = organization.Id
+            });
+
+
+        var updateRequest = new UpdateUserRequest
+        {
+            Username = secondUser.Username,
+            Email = firstUser.Email,
+            FirstName = "Admin",
+            LastName = "Updated",
+            OrganizationId = organization.Id
+        };
+
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(
+            () => service.UpdateAsync(
+                secondUser.Id,
+                updateRequest));
+
+
+        // Assert
+        Assert.Equal(
+            "A user with this email already exists",
+            exception.Message);
+    }
+
+
+    [Fact]
+    public async Task UpdateAsync_ShouldAllowUserToKeepSameUsername()
+    {
+        // Arrange
+        var userRepository = new FakeUserRepository();
+
+        var organizationRepository =
+            CreateOrganizationRepository(out var organization);
+
+        var passwordHasher = new FakePasswordHasher();
+
+        var service = new UserService(
+            userRepository,
+            organizationRepository,
+            passwordHasher);
+
+
+        var user = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "jason",
+                Email = "jason@test.com",
+                FirstName = "Jason",
+                LastName = "Broody",
+                OrganizationId = organization.Id
+            });
+
+
+        var updateRequest = new UpdateUserRequest
+        {
+            Username = "jason",
+            Email = "new@test.com",
+            FirstName = "Jason",
+            LastName = "Updated",
+            OrganizationId = organization.Id
+        };
+
+
+        // Act
+        var result = await service.UpdateAsync(
+            user.Id,
+            updateRequest);
+
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("jason", result.Username);
+        Assert.Equal("new@test.com", result.Email);
+    }
+
+
+    [Fact]
+    public async Task UpdateAsync_ShouldAllowUserToKeepSameEmail()
+    {
+        // Arrange
+        var userRepository = new FakeUserRepository();
+
+        var organizationRepository =
+            CreateOrganizationRepository(out var organization);
+
+        var passwordHasher = new FakePasswordHasher();
+
+        var service = new UserService(
+            userRepository,
+            organizationRepository,
+            passwordHasher);
+
+
+        var user = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "jason",
+                Email = "jason@test.com",
+                FirstName = "Jason",
+                LastName = "Broody",
+                OrganizationId = organization.Id
+            });
+
+
+        var updateRequest = new UpdateUserRequest
+        {
+            Username = "jason.updated",
+            Email = "jason@test.com",
+            FirstName = "Jason",
+            LastName = "Updated",
+            OrganizationId = organization.Id
+        };
+
+
+        // Act
+        var result = await service.UpdateAsync(
+            user.Id,
+            updateRequest);
+
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("jason.updated", result.Username);
+        Assert.Equal("jason@test.com", result.Email);
+    }
+
+
+    [Fact]
     public async Task DeactivateAsync_ShouldDeactivateUser_WhenUserExists()
     {
         // Arrange
@@ -220,20 +548,22 @@ public class UserServiceTests
             passwordHasher);
 
 
-        var user = await service.CreateAsync(new CreateUserRequest
-        {
-            Username = "jason",
-            Email = "jason@test.com",
-            FirstName = "Jason",
-            LastName = "Broody",
-            OrganizationId = organization.Id
-        });
+        var user = await service.CreateAsync(
+            new CreateUserRequest
+            {
+                Username = "jason",
+                Email = "jason@test.com",
+                FirstName = "Jason",
+                LastName = "Broody",
+                OrganizationId = organization.Id
+            });
 
 
         // Act
         var result = await service.DeactivateAsync(user.Id);
 
-        var updatedUser = await service.GetByIdAsync(user.Id);
+        var updatedUser =
+            await service.GetByIdAsync(user.Id);
 
 
         // Assert

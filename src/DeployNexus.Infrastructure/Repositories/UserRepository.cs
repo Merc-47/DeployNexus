@@ -38,6 +38,7 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+
     public async Task<IEnumerable<User>> GetInactiveUsersAsync()
     {
         return await _context.Users
@@ -45,11 +46,37 @@ public class UserRepository : IUserRepository
             .ToListAsync();
     }
 
+
     public async Task<User?> GetByUsernameAsync(string username)
     {
         return await _context.Users
             .FirstOrDefaultAsync(x => x.Username == username);
     }
+
+
+    public async Task<bool> ExistsByUsernameAsync(
+    Guid organizationId,
+    string username,
+    Guid? excludeUserId = null)
+    {
+        return await _context.Users.AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            x.Username == username &&
+            (!excludeUserId.HasValue || x.Id != excludeUserId.Value));
+    }
+
+
+    public async Task<bool> ExistsByEmailAsync(
+    Guid organizationId,
+    string email,
+    Guid? excludeUserId = null)
+    {
+        return await _context.Users.AnyAsync(x =>
+            x.OrganizationId == organizationId &&
+            x.Email == email &&
+            (!excludeUserId.HasValue || x.Id != excludeUserId.Value));
+    }
+
 
     public Task UpdateAsync(User user)
     {

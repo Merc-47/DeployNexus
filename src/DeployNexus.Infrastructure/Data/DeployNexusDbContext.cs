@@ -27,6 +27,7 @@ public class DeployNexusDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+
         // Role → Organization
 
         modelBuilder.Entity<Role>()
@@ -50,6 +51,7 @@ public class DeployNexusDbContext : DbContext
             .HasOne(rp => rp.Role)
             .WithMany(r => r.RolePermissions)
             .HasForeignKey(rp => rp.RoleId);
+
 
         // RolePermission → Permission
 
@@ -75,5 +77,27 @@ public class DeployNexusDbContext : DbContext
             .WithMany()
             .HasForeignKey(u => u.RoleId)
             .OnDelete(DeleteBehavior.Restrict);
+
+
+        // User → Organization-scoped username uniqueness
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => new
+            {
+                u.OrganizationId,
+                u.Username
+            })
+            .IsUnique();
+
+
+        // User → Organization-scoped email uniqueness
+
+        modelBuilder.Entity<User>()
+            .HasIndex(u => new
+            {
+                u.OrganizationId,
+                u.Email
+            })
+            .IsUnique();
     }
 }
