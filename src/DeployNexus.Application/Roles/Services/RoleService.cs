@@ -36,6 +36,19 @@ public class RoleService : IRoleService
             throw new Exception("Organization is inactive");
         }
 
+
+        var roleExists = await _roleRepository
+            .ExistsByNameAsync(
+                request.OrganizationId,
+                request.Name);
+
+        if (roleExists)
+        {
+            throw new Exception(
+                "A role with this name already exists in the organization");
+        }
+
+
         var role = new Role
         {
             Id = Guid.NewGuid(),

@@ -32,6 +32,18 @@ public class FakeRoleRepository : IRoleRepository
     }
 
 
+    public Task<bool> ExistsByNameAsync(
+        Guid organizationId,
+        string name)
+    {
+        var exists = _roles.Any(x =>
+            x.OrganizationId == organizationId &&
+            x.Name == name);
+
+        return Task.FromResult(exists);
+    }
+
+
     public Task UpdateAsync(Role role)
     {
         var existing = _roles
