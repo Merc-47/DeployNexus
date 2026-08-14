@@ -1,33 +1,40 @@
-﻿using DeployNexus.Application.Users.Interfaces;
-using DeployNexus.Application.Users.Services;
-using DeployNexus.Application.Organizations.Interfaces;
-using DeployNexus.Application.Organizations.Services;
-using DeployNexus.Application.Roles.Interfaces;
-using DeployNexus.Application.Roles.Services;
-using DeployNexus.Application.Authentication.Interfaces;
-using DeployNexus.Infrastructure.Authentication;
-using Microsoft.Extensions.DependencyInjection;
+﻿using DeployNexus.Application.Authentication.Interfaces;
 using DeployNexus.Application.Common.Interfaces;
+using DeployNexus.Infrastructure.Authentication;
 using DeployNexus.Infrastructure.Data;
 using DeployNexus.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
-
-namespace DeployNexus.Application;
+namespace DeployNexus.Infrastructure;
 
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(
-     this IServiceCollection services,
-     string connectionString,
-     IConfiguration configuration)
+        this IServiceCollection services,
+        string connectionString,
+        IConfiguration configuration)
     {
+        // ============================================================
+        // Database
+        // ============================================================
+
         services.AddDbContext<DeployNexusDbContext>(options =>
             options.UseSqlServer(connectionString));
 
+
+        // ============================================================
+        // JWT Configuration
+        // ============================================================
+
         services.Configure<JwtSettings>(
             configuration.GetSection("Jwt"));
+
+
+        // ============================================================
+        // Repositories
+        // ============================================================
 
         services.AddScoped<IUserRepository, UserRepository>();
 
@@ -39,9 +46,15 @@ public static class DependencyInjection
 
         services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 
+
+        // ============================================================
+        // Authentication Infrastructure
+        // ============================================================
+
         services.AddScoped<IPasswordHasher, PasswordHasher>();
 
         services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
+
 
         return services;
     }

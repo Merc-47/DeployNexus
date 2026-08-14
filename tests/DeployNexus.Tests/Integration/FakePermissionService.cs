@@ -6,20 +6,27 @@ namespace DeployNexus.Tests.Integration;
 
 public class FakePermissionService : IPermissionService
 {
+    private readonly Dictionary<Guid, PermissionDto> _permissions = new();
+
     private readonly Dictionary<Guid, HashSet<string>>
-        _permissions = new();
+        _userPermissions = new();
+
+
+    // ============================================================
+    // TEST PERMISSION AUTHORIZATION
+    // ============================================================
 
     public void SetPermission(
         Guid userId,
         string permissionCode,
         bool hasPermission)
     {
-        if (!_permissions.TryGetValue(
+        if (!_userPermissions.TryGetValue(
                 userId,
                 out var permissions))
         {
             permissions = new HashSet<string>();
-            _permissions[userId] = permissions;
+            _userPermissions[userId] = permissions;
         }
 
         if (hasPermission)
@@ -32,12 +39,13 @@ public class FakePermissionService : IPermissionService
         }
     }
 
+
     public Task<bool> HasPermissionAsync(
         Guid userId,
         string permissionCode)
     {
         var hasPermission =
-            _permissions.TryGetValue(
+            _userPermissions.TryGetValue(
                 userId,
                 out var permissions)
             && permissions.Contains(permissionCode);
@@ -46,36 +54,94 @@ public class FakePermissionService : IPermissionService
     }
 
 
+    // ============================================================
+    // CREATE
+    // ============================================================
+
     public Task<PermissionDto> CreateAsync(
         CreatePermissionRequest request)
     {
-        throw new NotImplementedException();
+        var permission = new PermissionDto
+        {
+            Id = Guid.NewGuid(),
+            Name = request.Name,
+            Code = request.Code,
+            IsActive = true
+        };
+
+        _permissions[permission.Id] = permission;
+
+        return Task.FromResult(permission);
     }
 
+
+    // ============================================================
+    // GET BY ID
+    // ============================================================
 
     public Task<PermissionDto?> GetByIdAsync(
         Guid id)
     {
-        throw new NotImplementedException();
+        _permissions.TryGetValue(
+            id,
+            out var permission);
+
+        return Task.FromResult(permission);
     }
 
+
+    // ============================================================
+    // GET ALL
+    // ============================================================
 
     public Task<IEnumerable<PermissionDto>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        return Task.FromResult<IEnumerable<PermissionDto>>(
+            _permissions.Values.ToList());
     }
 
+
+    // ============================================================
+    // UPDATE
+    // ============================================================
 
     public Task<PermissionDto?> UpdateAsync(
         Guid id,
         UpdatePermissionRequest request)
     {
-        throw new NotImplementedException();
+        if (!_permissions.TryGetValue(
+                id,
+                out var permission))
+        {
+            return Task.FromResult<PermissionDto?>(
+                null);
+        }
+
+        permission.Name = request.Name;
+        permission.Code = request.Code;
+
+        return Task.FromResult<PermissionDto?>(
+            permission);
     }
 
 
+    // ============================================================
+    // DEACTIVATE
+    // ============================================================
+
     public Task<Result> DeactivateAsync(Guid id)
     {
-        throw new NotImplementedException();
+        if (!_permissions.TryGetValue(
+                id,
+                out var permission))
+        {
+            return Task.FromResult(
+                Result.Failure("Permission not found"));
+        }
+
+        permission.IsActive = false;
+
+        return Task.FromResult(
+            Result.Ok());
     }
 }

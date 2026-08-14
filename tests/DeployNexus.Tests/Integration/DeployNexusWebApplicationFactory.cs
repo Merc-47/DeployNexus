@@ -43,6 +43,30 @@ public class DeployNexusWebApplicationFactory
 
 
             // ============================================================
+            // Fake User Repository
+            // ============================================================
+
+            RemoveService<IUserRepository>(services);
+
+            services.AddSingleton<FakeUserRepository>();
+
+            services.AddSingleton<IUserRepository>(sp =>
+                sp.GetRequiredService<FakeUserRepository>());
+
+
+            // ============================================================
+            // Fake Organization Repository
+            // ============================================================
+
+            RemoveService<IOrganizationRepository>(services);
+
+            services.AddSingleton<FakeOrganizationRepository>();
+
+            services.AddSingleton<IOrganizationRepository>(sp =>
+                sp.GetRequiredService<FakeOrganizationRepository>());
+
+
+            // ============================================================
             // Fake Role Service
             // ============================================================
 

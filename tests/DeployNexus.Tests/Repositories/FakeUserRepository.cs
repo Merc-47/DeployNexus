@@ -18,7 +18,8 @@ public class FakeUserRepository : IUserRepository
 
     public Task<User?> GetByIdAsync(Guid id)
     {
-        var user = _users.FirstOrDefault(x => x.Id == id);
+        var user = _users
+            .FirstOrDefault(x => x.Id == id);
 
         return Task.FromResult(user);
     }
@@ -26,26 +27,61 @@ public class FakeUserRepository : IUserRepository
 
     public Task<IEnumerable<User>> GetAllAsync()
     {
-        return Task.FromResult<IEnumerable<User>>(_users);
+        return Task.FromResult<IEnumerable<User>>(
+            _users.Where(x => x.IsActive));
     }
+
 
     public Task<IEnumerable<User>> GetInactiveUsersAsync()
     {
-        return Task.FromResult(
-            _users.Where(x => !x.IsActive)
-        );
+        return Task.FromResult<IEnumerable<User>>(
+            _users.Where(x => !x.IsActive));
     }
+
 
     public Task<User?> GetByUsernameAsync(string username)
     {
-        var user = _users.FirstOrDefault(x => x.Username == username);
+        var user = _users
+            .FirstOrDefault(x => x.Username == username);
 
         return Task.FromResult(user);
     }
 
+
+    public Task<bool> ExistsByUsernameAsync(
+        Guid organizationId,
+        string username,
+        Guid? excludeUserId = null)
+    {
+        var exists = _users.Any(x =>
+            x.OrganizationId == organizationId &&
+            x.Username == username &&
+            (!excludeUserId.HasValue ||
+             x.Id != excludeUserId.Value));
+
+        return Task.FromResult(exists);
+    }
+
+
+    public Task<bool> ExistsByEmailAsync(
+        Guid organizationId,
+        string email,
+        Guid? excludeUserId = null)
+    {
+        var exists = _users.Any(x =>
+            x.OrganizationId == organizationId &&
+            x.Email == email &&
+            (!excludeUserId.HasValue ||
+             x.Id != excludeUserId.Value));
+
+        return Task.FromResult(exists);
+    }
+
+
     public Task UpdateAsync(User user)
     {
-        var existingUser = _users.FirstOrDefault(x => x.Id == user.Id);
+        var existingUser = _users
+            .FirstOrDefault(x => x.Id == user.Id);
 
         if (existingUser != null)
         {
@@ -54,6 +90,10 @@ public class FakeUserRepository : IUserRepository
             existingUser.FirstName = user.FirstName;
             existingUser.LastName = user.LastName;
             existingUser.IsActive = user.IsActive;
+            existingUser.OrganizationId = user.OrganizationId;
+
+            // Important for User ↔ Role management
+            existingUser.RoleId = user.RoleId;
         }
 
         return Task.CompletedTask;

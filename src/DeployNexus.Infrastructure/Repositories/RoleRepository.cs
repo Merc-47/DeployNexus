@@ -14,7 +14,6 @@ public class RoleRepository : IRoleRepository
         _context = context;
     }
 
-
     public async Task<Role> AddAsync(Role role)
     {
         await _context.Roles.AddAsync(role);
@@ -22,20 +21,17 @@ public class RoleRepository : IRoleRepository
         return role;
     }
 
-
     public async Task<Role?> GetByIdAsync(Guid id)
     {
         return await _context.Roles
             .FirstOrDefaultAsync(x => x.Id == id);
     }
 
-
     public async Task<IEnumerable<Role>> GetAllAsync()
     {
         return await _context.Roles
             .ToListAsync();
     }
-
 
     public async Task<bool> ExistsByNameAsync(
         Guid organizationId,
@@ -47,14 +43,12 @@ public class RoleRepository : IRoleRepository
                 x.Name == name);
     }
 
-
     public Task UpdateAsync(Role role)
     {
         _context.Roles.Update(role);
 
         return Task.CompletedTask;
     }
-
 
     public async Task SaveChangesAsync()
     {

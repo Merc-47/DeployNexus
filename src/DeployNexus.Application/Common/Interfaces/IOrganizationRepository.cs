@@ -10,6 +10,10 @@ public interface IOrganizationRepository
 
     Task<IEnumerable<Organization>> GetAllAsync();
 
+    Task<bool> ExistsByCodeAsync(
+        string code,
+        Guid? excludeOrganizationId = null);
+
     Task UpdateAsync(Organization organization);
 
     Task SaveChangesAsync();

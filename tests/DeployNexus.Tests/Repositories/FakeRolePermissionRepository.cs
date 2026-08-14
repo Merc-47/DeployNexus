@@ -7,7 +7,6 @@ public class FakeRolePermissionRepository : IRolePermissionRepository
 {
     private readonly List<RolePermission> _rolePermissions = new();
 
-
     public Task AddAsync(RolePermission rolePermission)
     {
         _rolePermissions.Add(rolePermission);
@@ -15,14 +14,12 @@ public class FakeRolePermissionRepository : IRolePermissionRepository
         return Task.CompletedTask;
     }
 
-
     public Task RemoveAsync(RolePermission rolePermission)
     {
         _rolePermissions.Remove(rolePermission);
 
         return Task.CompletedTask;
     }
-
 
     public Task<RolePermission?> GetAsync(
         Guid roleId,
@@ -36,16 +33,15 @@ public class FakeRolePermissionRepository : IRolePermissionRepository
         return Task.FromResult(result);
     }
 
-
     public Task<IEnumerable<RolePermission>> GetPermissionsForRoleAsync(
         Guid roleId)
     {
         var result = _rolePermissions
-            .Where(x => x.RoleId == roleId);
+            .Where(x => x.RoleId == roleId)
+            .ToList();
 
         return Task.FromResult<IEnumerable<RolePermission>>(result);
     }
-
 
     public Task SaveChangesAsync()
     {
