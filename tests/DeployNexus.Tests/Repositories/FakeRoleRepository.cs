@@ -7,14 +7,12 @@ public class FakeRoleRepository : IRoleRepository
 {
     private readonly List<Role> _roles = new();
 
-
     public Task<Role> AddAsync(Role role)
     {
         _roles.Add(role);
 
         return Task.FromResult(role);
     }
-
 
     public Task<Role?> GetByIdAsync(Guid id)
     {
@@ -24,13 +22,11 @@ public class FakeRoleRepository : IRoleRepository
         return Task.FromResult(role);
     }
 
-
     public Task<IEnumerable<Role>> GetAllAsync()
     {
         return Task.FromResult<IEnumerable<Role>>(
             _roles);
     }
-
 
     public Task<bool> ExistsByNameAsync(
         Guid organizationId,
@@ -42,7 +38,6 @@ public class FakeRoleRepository : IRoleRepository
 
         return Task.FromResult(exists);
     }
-
 
     public Task UpdateAsync(Role role)
     {
@@ -59,7 +54,6 @@ public class FakeRoleRepository : IRoleRepository
 
         return Task.CompletedTask;
     }
-
 
     public Task SaveChangesAsync()
     {
