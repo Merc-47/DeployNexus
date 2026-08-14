@@ -43,10 +43,6 @@ public class AuthService : IAuthService
             throw new UnauthorizedAccessException("Invalid username or password");
         }
 
-        var token = _jwtTokenGenerator.GenerateToken(user);
-
-        var loginResponse = _jwtTokenGenerator.GenerateToken(user);
-
-        return loginResponse;
+        return _jwtTokenGenerator.GenerateToken(user);
     }
 }
