@@ -7,16 +7,16 @@ public class FakeOrganizationRepository : IOrganizationRepository
 {
     private readonly List<Organization> _organizations = new();
 
-
-    public Task<Organization> AddAsync(Organization organization)
+    public Task<Organization> AddAsync(
+        Organization organization)
     {
         _organizations.Add(organization);
 
         return Task.FromResult(organization);
     }
 
-
-    public Task<Organization?> GetByIdAsync(Guid id)
+    public Task<Organization?> GetByIdAsync(
+        Guid id)
     {
         var organization = _organizations
             .FirstOrDefault(x => x.Id == id);
@@ -24,15 +24,26 @@ public class FakeOrganizationRepository : IOrganizationRepository
         return Task.FromResult(organization);
     }
 
-
     public Task<IEnumerable<Organization>> GetAllAsync()
     {
         return Task.FromResult<IEnumerable<Organization>>(
             _organizations);
     }
 
+    public Task<bool> ExistsByCodeAsync(
+        string code,
+        Guid? excludeOrganizationId = null)
+    {
+        var exists = _organizations.Any(x =>
+            x.Code == code &&
+            (!excludeOrganizationId.HasValue ||
+             x.Id != excludeOrganizationId.Value));
 
-    public Task UpdateAsync(Organization organization)
+        return Task.FromResult(exists);
+    }
+
+    public Task UpdateAsync(
+        Organization organization)
     {
         var existing = _organizations
             .FirstOrDefault(x => x.Id == organization.Id);
@@ -47,15 +58,14 @@ public class FakeOrganizationRepository : IOrganizationRepository
         return Task.CompletedTask;
     }
 
-
     public Task SaveChangesAsync()
     {
         return Task.CompletedTask;
     }
 
-
     // Helper method for tests
-    public void AddTestOrganization(Organization organization)
+    public void AddTestOrganization(
+        Organization organization)
     {
         _organizations.Add(organization);
     }

@@ -111,4 +111,104 @@ public class OrganizationServiceTests
         Assert.NotNull(organization);
         Assert.False(organization.IsActive);
     }
+    [Fact]
+    public async Task CreateAsync_WithDuplicateCode_ShouldThrow()
+    {
+        var service = CreateService();
+
+        await service.CreateAsync(
+            new CreateOrganizationRequest
+            {
+                Name = "Organization One",
+                Code = "ORG1"
+            });
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.CreateAsync(
+                new CreateOrganizationRequest
+                {
+                    Name = "Organization Two",
+                    Code = "ORG1"
+                }));
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithEmptyName_ShouldThrow()
+    {
+        var service = CreateService();
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.CreateAsync(
+                new CreateOrganizationRequest
+                {
+                    Name = "",
+                    Code = "ORG1"
+                }));
+    }
+
+    [Fact]
+    public async Task CreateAsync_WithEmptyCode_ShouldThrow()
+    {
+        var service = CreateService();
+
+        await Assert.ThrowsAsync<ArgumentException>(
+            () => service.CreateAsync(
+                new CreateOrganizationRequest
+                {
+                    Name = "Acme",
+                    Code = ""
+                }));
+    }
+
+    [Fact]
+    public async Task UpdateAsync_WithDuplicateCode_ShouldThrow()
+    {
+        var service = CreateService();
+
+        var first = await service.CreateAsync(
+            new CreateOrganizationRequest
+            {
+                Name = "Organization One",
+                Code = "ORG1"
+            });
+
+        await service.CreateAsync(
+            new CreateOrganizationRequest
+            {
+                Name = "Organization Two",
+                Code = "ORG2"
+            });
+
+        await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.UpdateAsync(
+                first.Id,
+                new UpdateOrganizationRequest
+                {
+                    Name = "Organization One Updated",
+                    Code = "ORG2"
+                }));
+    }
+
+    [Fact]
+    public async Task DeactivateAsync_WhenAlreadyInactive_ShouldFail()
+    {
+        var service = CreateService();
+
+        var created = await service.CreateAsync(
+            new CreateOrganizationRequest
+            {
+                Name = "Acme",
+                Code = "ACME"
+            });
+
+        await service.DeactivateAsync(created.Id);
+
+        var result =
+            await service.DeactivateAsync(created.Id);
+
+        Assert.False(result.Success);
+        Assert.Equal(
+            "Organization is already inactive",
+            result.Message);
+    }
 }
