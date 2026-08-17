@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DeployNexus.Domain.Common;
+using DeployNexus.Domain.Enums;
 
 namespace DeployNexus.Domain.Entities;
-
-using DeployNexus.Domain.Common;
 
 public class Module : BaseEntity
 {
@@ -16,5 +11,9 @@ public class Module : BaseEntity
 
     public string Description { get; set; } = string.Empty;
 
-    public bool IsActive { get; set; } = true;
+    public ModuleStatus Status { get; set; }
+        = ModuleStatus.Available;
+
+    public ICollection<Permission> Permissions { get; set; }
+        = new List<Permission>();
 }
