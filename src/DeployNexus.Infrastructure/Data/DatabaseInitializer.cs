@@ -102,6 +102,10 @@ public static class DatabaseInitializer
 
         var permissions = new[]
         {
+            // ========================================================
+            // Users
+            // ========================================================
+
             new
             {
                 Name = "View Users",
@@ -130,6 +134,10 @@ public static class DatabaseInitializer
                 ModuleCode = "USERS"
             },
 
+
+            // ========================================================
+            // Organizations
+            // ========================================================
 
             new
             {
@@ -160,6 +168,10 @@ public static class DatabaseInitializer
             },
 
 
+            // ========================================================
+            // Roles
+            // ========================================================
+
             new
             {
                 Name = "View Roles",
@@ -188,6 +200,31 @@ public static class DatabaseInitializer
                 ModuleCode = "ROLES"
             },
 
+            new
+            {
+                Name = "View Role Permissions",
+                Code = "ROLE_PERMISSION_VIEW",
+                ModuleCode = "ROLES"
+            },
+
+            new
+            {
+                Name = "Assign Role Permissions",
+                Code = "ROLE_PERMISSION_ASSIGN",
+                ModuleCode = "ROLES"
+            },
+
+            new
+            {
+                Name = "Remove Role Permissions",
+                Code = "ROLE_PERMISSION_REMOVE",
+                ModuleCode = "ROLES"
+            },
+
+
+            // ========================================================
+            // Permissions
+            // ========================================================
 
             new
             {
@@ -217,6 +254,10 @@ public static class DatabaseInitializer
                 ModuleCode = "PERMISSIONS"
             },
 
+
+            // ========================================================
+            // Modules
+            // ========================================================
 
             new
             {

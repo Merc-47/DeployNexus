@@ -19,7 +19,8 @@ public class RolePermissionsControllerTests
 
     private readonly FakeRoleRepository _roleRepository;
     private readonly FakePermissionRepository _permissionRepository;
-    private readonly FakeRolePermissionRepository _rolePermissionRepository;
+    private readonly FakeRolePermissionRepository
+        _rolePermissionRepository;
 
 
     public RolePermissionsControllerTests(
@@ -68,7 +69,6 @@ public class RolePermissionsControllerTests
             "X-Test-UserId",
             userId.ToString());
 
-
         var role = await CreateRole();
 
 
@@ -99,7 +99,6 @@ public class RolePermissionsControllerTests
         _client.DefaultRequestHeaders.Add(
             "X-Test-UserId",
             userId.ToString());
-
 
         var role = await CreateRole();
 
@@ -136,11 +135,9 @@ public class RolePermissionsControllerTests
             "X-Test-UserId",
             userId.ToString());
 
-
         var role = await CreateRole();
 
         var permission = await CreatePermission();
-
 
         var request = new AssignPermissionRequest
         {
@@ -177,11 +174,9 @@ public class RolePermissionsControllerTests
             "X-Test-UserId",
             userId.ToString());
 
-
         var role = await CreateRole();
 
         var permission = await CreatePermission();
-
 
         var request = new AssignPermissionRequest
         {
@@ -222,13 +217,12 @@ public class RolePermissionsControllerTests
             "X-Test-UserId",
             userId.ToString());
 
-
         var role = await CreateRole();
 
         var permission = await CreatePermission();
 
 
-        // Create the existing role-permission assignment
+        // Create existing role-permission assignment
         var rolePermission = new RolePermission
         {
             Id = Guid.NewGuid(),
@@ -268,13 +262,12 @@ public class RolePermissionsControllerTests
             "X-Test-UserId",
             userId.ToString());
 
-
         var role = await CreateRole();
 
         var permission = await CreatePermission();
 
 
-        // Create an existing assignment.
+        // Create existing assignment
         var rolePermission = new RolePermission
         {
             Id = Guid.NewGuid(),
@@ -295,6 +288,42 @@ public class RolePermissionsControllerTests
         // Assert
         Assert.Equal(
             HttpStatusCode.Forbidden,
+            response.StatusCode);
+    }
+
+
+    [Fact]
+    public async Task Remove_WhenAssignmentDoesNotExist_Returns404()
+    {
+        // Arrange
+        var userId = Guid.NewGuid();
+
+        _permissionService.SetPermission(
+            userId,
+            "ROLE_PERMISSION_REMOVE",
+            true);
+
+        _client.DefaultRequestHeaders.Add(
+            "X-Test-UserId",
+            userId.ToString());
+
+        var role = await CreateRole();
+
+        var permission = await CreatePermission();
+
+
+        // No RolePermission assignment is created here.
+
+
+        // Act
+        var response =
+            await _client.DeleteAsync(
+                $"/api/Roles/{role.Id}/permissions/{permission.Id}");
+
+
+        // Assert
+        Assert.Equal(
+            HttpStatusCode.NotFound,
             response.StatusCode);
     }
 
