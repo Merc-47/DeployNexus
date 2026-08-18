@@ -80,6 +80,15 @@ public class DeployNexusDbContext : DbContext
 
 
         // ============================================================
+        // Module
+        // ============================================================
+
+        modelBuilder.Entity<Module>()
+            .HasIndex(m => m.Code)
+            .IsUnique();
+
+
+        // ============================================================
         // Module → Permission
         // ============================================================
 
@@ -90,7 +99,6 @@ public class DeployNexusDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
 
-        // Permission code should be unique
         modelBuilder.Entity<Permission>()
             .HasIndex(p => p.Code)
             .IsUnique();

@@ -16,4 +16,5 @@ public class Module : BaseEntity
 
     public ICollection<Permission> Permissions { get; set; }
         = new List<Permission>();
+
 }
