@@ -46,6 +46,8 @@ public static class DependencyInjection
 
         services.AddScoped<IRolePermissionRepository, RolePermissionRepository>();
 
+        services.AddScoped<IModuleRepository, ModuleRepository>();
+
 
         // ============================================================
         // Authentication Infrastructure

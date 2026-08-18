@@ -8,5 +8,7 @@ public class PermissionDto
 
     public string Code { get; set; } = string.Empty;
 
+    public Guid ModuleId { get; set; }
+
     public bool IsActive { get; set; }
 }

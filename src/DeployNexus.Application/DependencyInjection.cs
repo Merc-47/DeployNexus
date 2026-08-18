@@ -11,6 +11,8 @@ using DeployNexus.Application.RolePermissions.Services;
 using Microsoft.Extensions.DependencyInjection;
 using DeployNexus.Application.Authentication.Interfaces;
 using DeployNexus.Application.Authentication.Services;
+using DeployNexus.Application.Modules.Interfaces;
+using DeployNexus.Application.Modules.Services;
 
 
 namespace DeployNexus.Application;
@@ -30,6 +32,8 @@ public static class DependencyInjection
         services.AddScoped<IRolePermissionService, RolePermissionService>();
 
         services.AddScoped<IAuthService, AuthService>();
+
+        services.AddScoped<IModuleService, ModuleService>();
 
         return services;
     }

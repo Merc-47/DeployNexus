@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DeployNexus.Domain.Common;
 
 namespace DeployNexus.Domain.Entities;
-
-using DeployNexus.Domain.Common;
 
 public class Permission : BaseEntity
 {
@@ -15,6 +9,10 @@ public class Permission : BaseEntity
     public string Code { get; set; } = string.Empty;
 
     public bool IsActive { get; set; } = true;
+
+    public Guid ModuleId { get; set; }
+
+    public Module Module { get; set; } = null!;
 
     public ICollection<RolePermission> RolePermissions { get; set; }
         = new List<RolePermission>();

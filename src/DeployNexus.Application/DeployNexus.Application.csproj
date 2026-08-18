@@ -15,10 +15,4 @@
     <ProjectReference Include="..\DeployNexus.Shared\DeployNexus.Shared.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Modules\Interfaces\" />
-    <Folder Include="Modules\DTOs\" />
-    <Folder Include="Modules\Services\" />
-  </ItemGroup>
-
 </Project>

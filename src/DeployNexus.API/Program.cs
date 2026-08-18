@@ -2,6 +2,7 @@ using System.Text;
 using DeployNexus.API.Authorization;
 using DeployNexus.Application;
 using DeployNexus.Infrastructure;
+using DeployNexus.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -83,6 +84,18 @@ builder.Services.AddSingleton<IAuthorizationPolicyProvider,
     PermissionPolicyProvider>();
 
 var app = builder.Build();
+
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbContext =
+            scope.ServiceProvider
+                .GetRequiredService<DeployNexusDbContext>();
+
+        await DatabaseInitializer.InitializeAsync(dbContext);
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

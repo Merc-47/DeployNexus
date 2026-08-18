@@ -1,4 +1,5 @@
 ﻿using DeployNexus.Application.Common.Interfaces;
+using DeployNexus.Application.Modules.Interfaces;
 using DeployNexus.Application.Permissions.Interfaces;
 using DeployNexus.Application.Roles.Interfaces;
 using DeployNexus.Tests.Repositories;
@@ -76,6 +77,18 @@ public class DeployNexusWebApplicationFactory
 
             services.AddSingleton<IRoleService>(sp =>
                 sp.GetRequiredService<FakeRoleService>());
+
+
+            // ============================================================
+            // Fake Module Service
+            // ============================================================
+
+            RemoveService<IModuleService>(services);
+
+            services.AddSingleton<FakeModuleService>();
+
+            services.AddSingleton<IModuleService>(sp =>
+                sp.GetRequiredService<FakeModuleService>());
 
 
             // ============================================================

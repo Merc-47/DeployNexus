@@ -22,13 +22,18 @@ public class DeployNexusDbContext : DbContext
 
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
+    public DbSet<Module> Modules => Set<Module>();
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+    protected override void OnModelCreating(
+        ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
 
+        // ============================================================
         // Role → Organization
+        // ============================================================
 
         modelBuilder.Entity<Role>()
             .HasOne(r => r.Organization)
@@ -45,7 +50,9 @@ public class DeployNexusDbContext : DbContext
             .IsUnique();
 
 
+        // ============================================================
         // RolePermission → Role
+        // ============================================================
 
         modelBuilder.Entity<RolePermission>()
             .HasOne(rp => rp.Role)
@@ -53,7 +60,9 @@ public class DeployNexusDbContext : DbContext
             .HasForeignKey(rp => rp.RoleId);
 
 
+        // ============================================================
         // RolePermission → Permission
+        // ============================================================
 
         modelBuilder.Entity<RolePermission>()
             .HasOne(rp => rp.Permission)
@@ -70,7 +79,34 @@ public class DeployNexusDbContext : DbContext
             .IsUnique();
 
 
+        // ============================================================
+        // Module
+        // ============================================================
+
+        modelBuilder.Entity<Module>()
+            .HasIndex(m => m.Code)
+            .IsUnique();
+
+
+        // ============================================================
+        // Module → Permission
+        // ============================================================
+
+        modelBuilder.Entity<Permission>()
+            .HasOne(p => p.Module)
+            .WithMany(m => m.Permissions)
+            .HasForeignKey(p => p.ModuleId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+
+        modelBuilder.Entity<Permission>()
+            .HasIndex(p => p.Code)
+            .IsUnique();
+
+
+        // ============================================================
         // User → Role
+        // ============================================================
 
         modelBuilder.Entity<User>()
             .HasOne(u => u.Role)
@@ -79,7 +115,9 @@ public class DeployNexusDbContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
 
 
+        // ============================================================
         // User → Organization-scoped username uniqueness
+        // ============================================================
 
         modelBuilder.Entity<User>()
             .HasIndex(u => new
@@ -90,7 +128,9 @@ public class DeployNexusDbContext : DbContext
             .IsUnique();
 
 
+        // ============================================================
         // User → Organization-scoped email uniqueness
+        // ============================================================
 
         modelBuilder.Entity<User>()
             .HasIndex(u => new
