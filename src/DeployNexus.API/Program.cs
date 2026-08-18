@@ -1,5 +1,6 @@
 using System.Text;
 using DeployNexus.API.Authorization;
+using DeployNexus.API.Exceptions;
 using DeployNexus.Application;
 using DeployNexus.Infrastructure;
 using DeployNexus.Infrastructure.Data;
@@ -10,10 +11,17 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ============================================================
+// Services
+// ============================================================
 
 builder.Services.AddControllers();
+
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -42,48 +50,84 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// Register Application Layer
+
+// ============================================================
+// Application Layer
+// ============================================================
+
 builder.Services.AddApplication();
 
-// Register Infrastructure Layer
+
+// ============================================================
+// Infrastructure Layer
+// ============================================================
+
 builder.Services.AddInfrastructure(
     builder.Configuration.GetConnectionString("DefaultConnection")!,
-    builder.Configuration
-);
+    builder.Configuration);
 
-// Configure JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("Jwt");
 
-var secretKey = jwtSettings["SecretKey"];
+// ============================================================
+// JWT Authentication
+// ============================================================
+
+var jwtSettings =
+    builder.Configuration.GetSection("Jwt");
+
+var secretKey =
+    jwtSettings["SecretKey"];
 
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddAuthentication(
+        JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
+        options.TokenValidationParameters =
+            new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
 
-            ValidIssuer = jwtSettings["Issuer"],
-            ValidAudience = jwtSettings["Audience"],
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
 
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(secretKey!))
-        };
+                IssuerSigningKey =
+                    new SymmetricSecurityKey(
+                        Encoding.UTF8.GetBytes(secretKey!))
+            };
     });
+
+
+// ============================================================
+// Authorization
+// ============================================================
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddScoped<IAuthorizationHandler,
+builder.Services.AddScoped<
+    IAuthorizationHandler,
     PermissionAuthorizationHandler>();
 
-builder.Services.AddSingleton<IAuthorizationPolicyProvider,
+builder.Services.AddSingleton<
+    IAuthorizationPolicyProvider,
     PermissionPolicyProvider>();
 
+
 var app = builder.Build();
+
+
+// ============================================================
+// Global Exception Handling
+// ============================================================
+
+app.UseExceptionHandler();
+
+
+// ============================================================
+// Database Initialization
+// ============================================================
 
 if (!app.Environment.IsEnvironment("Testing"))
 {
@@ -93,11 +137,16 @@ if (!app.Environment.IsEnvironment("Testing"))
             scope.ServiceProvider
                 .GetRequiredService<DeployNexusDbContext>();
 
-        await DatabaseInitializer.InitializeAsync(dbContext);
+        await DatabaseInitializer.InitializeAsync(
+            dbContext);
     }
 }
 
-// Configure the HTTP request pipeline.
+
+// ============================================================
+// HTTP Request Pipeline
+// ============================================================
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -113,6 +162,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
 
 public partial class Program
 {

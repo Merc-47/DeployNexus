@@ -17,40 +17,29 @@ public class OrganizationsController : ControllerBase
         _organizationService = organizationService;
     }
 
+
+    // ============================================================
     // CREATE ORGANIZATION
+    // ============================================================
 
     [RequirePermission("ORGANIZATION_CREATE")]
     [HttpPost]
     public async Task<IActionResult> Create(
         CreateOrganizationRequest request)
     {
-        try
-        {
-            var result =
-                await _organizationService.CreateAsync(request);
+        var result =
+            await _organizationService.CreateAsync(request);
 
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = result.Id },
-                result);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new
-            {
-                message = ex.Message
-            });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new
-            {
-                message = ex.Message
-            });
-        }
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = result.Id },
+            result);
     }
 
+
+    // ============================================================
     // GET ALL ORGANIZATIONS
+    // ============================================================
 
     [RequirePermission("ORGANIZATION_VIEW")]
     [HttpGet]
@@ -62,7 +51,10 @@ public class OrganizationsController : ControllerBase
         return Ok(organizations);
     }
 
+
+    // ============================================================
     // GET ORGANIZATION BY ID
+    // ============================================================
 
     [RequirePermission("ORGANIZATION_VIEW")]
     [HttpGet("{id}")]
@@ -73,12 +65,17 @@ public class OrganizationsController : ControllerBase
             await _organizationService.GetByIdAsync(id);
 
         if (organization == null)
+        {
             return NotFound();
+        }
 
         return Ok(organization);
     }
 
+
+    // ============================================================
     // UPDATE ORGANIZATION
+    // ============================================================
 
     [RequirePermission("ORGANIZATION_UPDATE")]
     [HttpPut("{id}")]
@@ -86,35 +83,23 @@ public class OrganizationsController : ControllerBase
         Guid id,
         UpdateOrganizationRequest request)
     {
-        try
-        {
-            var organization =
-                await _organizationService.UpdateAsync(
-                    id,
-                    request);
+        var organization =
+            await _organizationService.UpdateAsync(
+                id,
+                request);
 
-            if (organization == null)
-                return NotFound();
+        if (organization == null)
+        {
+            return NotFound();
+        }
 
-            return Ok(organization);
-        }
-        catch (ArgumentException ex)
-        {
-            return BadRequest(new
-            {
-                message = ex.Message
-            });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return Conflict(new
-            {
-                message = ex.Message
-            });
-        }
+        return Ok(organization);
     }
 
+
+    // ============================================================
     // DEACTIVATE ORGANIZATION
+    // ============================================================
 
     [RequirePermission("ORGANIZATION_DELETE")]
     [HttpDelete("{id}")]
@@ -125,7 +110,9 @@ public class OrganizationsController : ControllerBase
             await _organizationService.DeactivateAsync(id);
 
         if (!result.Success)
+        {
             return NotFound(result.Message);
+        }
 
         return NoContent();
     }

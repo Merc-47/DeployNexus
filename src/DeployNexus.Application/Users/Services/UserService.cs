@@ -1,4 +1,5 @@
 ﻿using DeployNexus.Application.Common;
+using DeployNexus.Application.Common.Exceptions;
 using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Application.Users.DTOs;
 using DeployNexus.Application.Users.Interfaces;
@@ -28,42 +29,52 @@ public class UserService : IUserService
     }
 
 
-    public async Task<UserDto> CreateAsync(CreateUserRequest request)
+    // ============================================================
+    // CREATE
+    // ============================================================
+
+    public async Task<UserDto> CreateAsync(
+        CreateUserRequest request)
     {
-        var organization = await _organizationRepository
-            .GetByIdAsync(request.OrganizationId);
+        var organization =
+            await _organizationRepository
+                .GetByIdAsync(request.OrganizationId);
 
         if (organization == null)
         {
-            throw new Exception("Organization not found");
+            throw new NotFoundException(
+                "Organization not found");
         }
 
         if (!organization.IsActive)
         {
-            throw new Exception("Organization is inactive");
+            throw new ValidationException(
+                "Organization is inactive");
         }
 
 
-        var usernameExists = await _userRepository
-            .ExistsByUsernameAsync(
-                request.OrganizationId,
-                request.Username);
+        var usernameExists =
+            await _userRepository
+                .ExistsByUsernameAsync(
+                    request.OrganizationId,
+                    request.Username);
 
         if (usernameExists)
         {
-            throw new Exception(
+            throw new ConflictException(
                 "A user with this username already exists");
         }
 
 
-        var emailExists = await _userRepository
-            .ExistsByEmailAsync(
-                request.OrganizationId,
-                request.Email);
+        var emailExists =
+            await _userRepository
+                .ExistsByEmailAsync(
+                    request.OrganizationId,
+                    request.Email);
 
         if (emailExists)
         {
-            throw new Exception(
+            throw new ConflictException(
                 "A user with this email already exists");
         }
 
@@ -73,7 +84,8 @@ public class UserService : IUserService
             Id = Guid.NewGuid(),
             Username = request.Username,
             Email = request.Email,
-            PasswordHash = _passwordHasher.Hash(request.Password),
+            PasswordHash =
+                _passwordHasher.Hash(request.Password),
             FirstName = request.FirstName,
             LastName = request.LastName,
             IsActive = true,
@@ -86,45 +98,72 @@ public class UserService : IUserService
 
         await _userRepository.SaveChangesAsync();
 
+
         return MapToDto(user);
     }
 
 
-    public async Task<UserDto?> GetByIdAsync(Guid id)
+    // ============================================================
+    // GET BY ID
+    // ============================================================
+
+    public async Task<UserDto?> GetByIdAsync(
+        Guid id)
     {
-        var user = await _userRepository.GetByIdAsync(id);
+        var user =
+            await _userRepository
+                .GetByIdAsync(id);
 
         if (user == null)
         {
             return null;
         }
 
+
         return MapToDto(user);
     }
 
 
+    // ============================================================
+    // GET ALL
+    // ============================================================
+
     public async Task<IEnumerable<UserDto>> GetAllAsync()
     {
-        var users = await _userRepository.GetAllAsync();
+        var users =
+            await _userRepository
+                .GetAllAsync();
 
         return users.Select(MapToDto);
     }
 
 
-    public async Task<IEnumerable<UserDto>> GetInactiveUsersAsync()
+    // ============================================================
+    // GET INACTIVE USERS
+    // ============================================================
+
+    public async Task<IEnumerable<UserDto>>
+        GetInactiveUsersAsync()
     {
-        var users = await _userRepository
-            .GetInactiveUsersAsync();
+        var users =
+            await _userRepository
+                .GetInactiveUsersAsync();
 
         return users.Select(MapToDto);
     }
 
+
+    // ============================================================
+    // UPDATE
+    // ============================================================
 
     public async Task<UserDto?> UpdateAsync(
         Guid id,
         UpdateUserRequest request)
     {
-        var user = await _userRepository.GetByIdAsync(id);
+        var user =
+            await _userRepository
+                .GetByIdAsync(id);
 
         if (user == null)
         {
@@ -132,144 +171,222 @@ public class UserService : IUserService
         }
 
 
-        var organization = await _organizationRepository
-            .GetByIdAsync(request.OrganizationId);
+        var organization =
+            await _organizationRepository
+                .GetByIdAsync(request.OrganizationId);
 
         if (organization == null)
         {
-            throw new Exception("Organization not found");
+            throw new NotFoundException(
+                "Organization not found");
         }
 
         if (!organization.IsActive)
         {
-            throw new Exception("Organization is inactive");
+            throw new ValidationException(
+                "Organization is inactive");
         }
 
 
-        // Check username only if it is being changed.
+        // --------------------------------------------------------
+        // Username uniqueness
+        // --------------------------------------------------------
+
         if (!string.Equals(
                 user.Username,
                 request.Username,
                 StringComparison.OrdinalIgnoreCase))
         {
-            var usernameExists = await _userRepository
-                .ExistsByUsernameAsync(
-                    request.OrganizationId,
-                    request.Username);
+            var usernameExists =
+                await _userRepository
+                    .ExistsByUsernameAsync(
+                        request.OrganizationId,
+                        request.Username);
 
             if (usernameExists)
             {
-                throw new Exception(
+                throw new ConflictException(
                     "A user with this username already exists");
             }
         }
 
 
-        // Check email only if it is being changed.
+        // --------------------------------------------------------
+        // Email uniqueness
+        // --------------------------------------------------------
+
         if (!string.Equals(
                 user.Email,
                 request.Email,
                 StringComparison.OrdinalIgnoreCase))
         {
-            var emailExists = await _userRepository
-                .ExistsByEmailAsync(
-                    request.OrganizationId,
-                    request.Email);
+            var emailExists =
+                await _userRepository
+                    .ExistsByEmailAsync(
+                        request.OrganizationId,
+                        request.Email);
 
             if (emailExists)
             {
-                throw new Exception(
+                throw new ConflictException(
                     "A user with this email already exists");
             }
         }
 
 
-        user.Username = request.Username;
-        user.Email = request.Email;
-        user.FirstName = request.FirstName;
-        user.LastName = request.LastName;
-        user.OrganizationId = request.OrganizationId;
+        user.Username =
+            request.Username;
+
+        user.Email =
+            request.Email;
+
+        user.FirstName =
+            request.FirstName;
+
+        user.LastName =
+            request.LastName;
+
+        user.OrganizationId =
+            request.OrganizationId;
 
 
-        await _userRepository.UpdateAsync(user);
+        await _userRepository
+            .UpdateAsync(user);
 
-        await _userRepository.SaveChangesAsync();
+        await _userRepository
+            .SaveChangesAsync();
+
 
         return MapToDto(user);
     }
 
 
+    // ============================================================
+    // ASSIGN / REMOVE ROLE
+    // ============================================================
+
     public async Task<UserDto?> AssignRoleAsync(
-     Guid userId,
-     AssignUserRoleRequest request)
+        Guid userId,
+        AssignUserRoleRequest request)
     {
-        var user = await _userRepository.GetByIdAsync(userId);
+        var user =
+            await _userRepository
+                .GetByIdAsync(userId);
 
         if (user == null)
         {
             return null;
         }
 
-        // Null RoleId means remove the user's role.
+
+        // --------------------------------------------------------
+        // Remove role
+        // --------------------------------------------------------
+
         if (request.RoleId == null)
         {
             user.RoleId = null;
 
-            await _userRepository.UpdateAsync(user);
-            await _userRepository.SaveChangesAsync();
+            await _userRepository
+                .UpdateAsync(user);
+
+            await _userRepository
+                .SaveChangesAsync();
 
             return MapToDto(user);
         }
 
-        var role = await _roleRepository
-            .GetByIdAsync(request.RoleId.Value);
+
+        // --------------------------------------------------------
+        // Find role
+        // --------------------------------------------------------
+
+        var role =
+            await _roleRepository
+                .GetByIdAsync(request.RoleId.Value);
 
         if (role == null)
         {
-            throw new Exception("Role not found");
+            throw new NotFoundException(
+                "Role not found");
         }
+
+
+        // --------------------------------------------------------
+        // Role must be active
+        // --------------------------------------------------------
 
         if (!role.IsActive)
         {
-            throw new Exception("Role is inactive");
+            throw new ValidationException(
+                "Role is inactive");
         }
+
+
+        // --------------------------------------------------------
+        // Role must belong to same organization
+        // --------------------------------------------------------
 
         if (role.OrganizationId != user.OrganizationId)
         {
-            throw new Exception(
+            throw new ValidationException(
                 "Role does not belong to the user's organization");
         }
 
-        user.RoleId = role.Id;
 
-        await _userRepository.UpdateAsync(user);
-        await _userRepository.SaveChangesAsync();
+        user.RoleId =
+            role.Id;
+
+
+        await _userRepository
+            .UpdateAsync(user);
+
+        await _userRepository
+            .SaveChangesAsync();
+
 
         return MapToDto(user);
     }
 
 
-    public async Task<Result> DeactivateAsync(Guid id)
+    // ============================================================
+    // DEACTIVATE
+    // ============================================================
+
+    public async Task<Result> DeactivateAsync(
+        Guid id)
     {
-        var user = await _userRepository.GetByIdAsync(id);
+        var user =
+            await _userRepository
+                .GetByIdAsync(id);
 
         if (user == null)
         {
-            return Result.Failure("User not found");
+            return Result.Failure(
+                "User not found");
         }
 
 
         user.IsActive = false;
 
-        await _userRepository.UpdateAsync(user);
 
-        await _userRepository.SaveChangesAsync();
+        await _userRepository
+            .UpdateAsync(user);
+
+        await _userRepository
+            .SaveChangesAsync();
+
 
         return Result.Ok();
     }
 
 
-    private static UserDto MapToDto(User user)
+    // ============================================================
+    // MAPPING
+    // ============================================================
+
+    private static UserDto MapToDto(
+        User user)
     {
         return new UserDto
         {

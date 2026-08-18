@@ -1,4 +1,5 @@
-﻿using DeployNexus.Application.Modules.DTOs;
+﻿using DeployNexus.Application.Common.Exceptions;
+using DeployNexus.Application.Modules.DTOs;
 using DeployNexus.Application.Modules.Services;
 using DeployNexus.Domain.Enums;
 using DeployNexus.Tests.Repositories;
@@ -75,7 +76,57 @@ public class ModuleServiceTests
 
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(
+        await Assert.ThrowsAsync<ConflictException>(
+            () => service.CreateAsync(request));
+    }
+
+
+    [Fact]
+    public async Task CreateAsync_ShouldFail_WhenNameIsEmpty()
+    {
+        // Arrange
+        var repository =
+            new FakeModuleRepository();
+
+        var service =
+            new ModuleService(repository);
+
+        var request =
+            new CreateModuleRequest
+            {
+                Name = "",
+                Code = "USER_MANAGEMENT",
+                Description = "User management module"
+            };
+
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(
+            () => service.CreateAsync(request));
+    }
+
+
+    [Fact]
+    public async Task CreateAsync_ShouldFail_WhenCodeIsEmpty()
+    {
+        // Arrange
+        var repository =
+            new FakeModuleRepository();
+
+        var service =
+            new ModuleService(repository);
+
+        var request =
+            new CreateModuleRequest
+            {
+                Name = "User Management",
+                Code = "",
+                Description = "User management module"
+            };
+
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationException>(
             () => service.CreateAsync(request));
     }
 
@@ -268,6 +319,49 @@ public class ModuleServiceTests
 
 
     [Fact]
+    public async Task UpdateAsync_ShouldFail_WhenNewCodeAlreadyExists()
+    {
+        // Arrange
+        var repository =
+            new FakeModuleRepository();
+
+        var service =
+            new ModuleService(repository);
+
+
+        var first =
+            await service.CreateAsync(
+                new CreateModuleRequest
+                {
+                    Name = "User Management",
+                    Code = "USER_MANAGEMENT",
+                    Description = "Users"
+                });
+
+
+        await service.CreateAsync(
+            new CreateModuleRequest
+            {
+                Name = "Role Management",
+                Code = "ROLE_MANAGEMENT",
+                Description = "Roles"
+            });
+
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ConflictException>(
+            () => service.UpdateAsync(
+                first.Id,
+                new UpdateModuleRequest
+                {
+                    Name = "User Management",
+                    Code = "ROLE_MANAGEMENT",
+                    Description = "Updated"
+                }));
+    }
+
+
+    [Fact]
     public async Task DisableAsync_ShouldDisableModule_WhenExists()
     {
         // Arrange
@@ -330,5 +424,50 @@ public class ModuleServiceTests
         // Assert
         Assert.False(
             result.Success);
+
+        Assert.Equal(
+            "Module not found",
+            result.Message);
+    }
+
+
+    [Fact]
+    public async Task DisableAsync_ShouldFail_WhenModuleIsAlreadyDisabled()
+    {
+        // Arrange
+        var repository =
+            new FakeModuleRepository();
+
+        var service =
+            new ModuleService(repository);
+
+
+        var created =
+            await service.CreateAsync(
+                new CreateModuleRequest
+                {
+                    Name = "Deployment",
+                    Code = "DEPLOYMENT",
+                    Description = "Deployment module"
+                });
+
+
+        await service.DisableAsync(
+            created.Id);
+
+
+        // Act
+        var result =
+            await service.DisableAsync(
+                created.Id);
+
+
+        // Assert
+        Assert.False(
+            result.Success);
+
+        Assert.Equal(
+            "Module is already disabled",
+            result.Message);
     }
 }

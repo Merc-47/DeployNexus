@@ -1,4 +1,5 @@
-﻿using DeployNexus.Application.RolePermissions.DTOs;
+﻿using DeployNexus.Application.Common.Exceptions;
+using DeployNexus.Application.RolePermissions.DTOs;
 using DeployNexus.Application.RolePermissions.Services;
 using DeployNexus.Domain.Entities;
 using DeployNexus.Tests.Repositories;
@@ -8,6 +9,10 @@ namespace DeployNexus.Tests.RolePermissions;
 
 public class RolePermissionServiceTests
 {
+    // ============================================================
+    // ASSIGN
+    // ============================================================
+
     [Fact]
     public async Task AssignAsync_ShouldAssignPermissionSuccessfully()
     {
@@ -91,7 +96,7 @@ public class RolePermissionServiceTests
             permissionRepository);
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() =>
+        await Assert.ThrowsAsync<NotFoundException>(() =>
             service.AssignAsync(
                 Guid.NewGuid(),
                 new AssignPermissionRequest
@@ -125,7 +130,7 @@ public class RolePermissionServiceTests
             permissionRepository);
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() =>
+        await Assert.ThrowsAsync<NotFoundException>(() =>
             service.AssignAsync(
                 role.Id,
                 new AssignPermissionRequest
@@ -177,7 +182,7 @@ public class RolePermissionServiceTests
             permissionRepository);
 
         // Act & Assert
-        await Assert.ThrowsAsync<Exception>(() =>
+        await Assert.ThrowsAsync<ConflictException>(() =>
             service.AssignAsync(
                 role.Id,
                 new AssignPermissionRequest
@@ -186,6 +191,10 @@ public class RolePermissionServiceTests
                 }));
     }
 
+
+    // ============================================================
+    // REMOVE
+    // ============================================================
 
     [Fact]
     public async Task RemoveAsync_ShouldRemovePermission()
@@ -268,6 +277,10 @@ public class RolePermissionServiceTests
         Assert.False(result);
     }
 
+
+    // ============================================================
+    // GET PERMISSIONS
+    // ============================================================
 
     [Fact]
     public async Task GetPermissionsAsync_ShouldReturnPermissions()

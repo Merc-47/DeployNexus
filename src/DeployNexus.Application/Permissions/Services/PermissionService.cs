@@ -1,4 +1,5 @@
 ﻿using DeployNexus.Application.Common;
+using DeployNexus.Application.Common.Exceptions;
 using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Application.Permissions.DTOs;
 using DeployNexus.Application.Permissions.Interfaces;
@@ -29,23 +30,21 @@ public class PermissionService : IPermissionService
     public async Task<PermissionDto> CreateAsync(
         CreatePermissionRequest request)
     {
-        // Make sure the module exists.
         var module =
             await _moduleRepository.GetByIdAsync(
                 request.ModuleId);
 
+
         if (module == null)
         {
-            throw new Exception(
+            throw new NotFoundException(
                 "Module not found");
         }
 
 
-        // Don't allow permissions to be created
-        // under a disabled module.
         if (module.Status == ModuleStatus.Disabled)
         {
-            throw new Exception(
+            throw new ValidationException(
                 "Cannot create permission for a disabled module");
         }
 
