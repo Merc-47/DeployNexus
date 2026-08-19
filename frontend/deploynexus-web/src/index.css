@@ -1,0 +1,955 @@
+/* ============================================================
+   Deploy Nexus - Login
+   ============================================================ */
+
+   * {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    background: #0f172a;
+}
+
+
+/* ============================================================
+   Page
+   ============================================================ */
+
+.login-page {
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a 0%,
+            #172554 45%,
+            #1e3a8a 100%
+        );
+}
+
+
+/* ============================================================
+   Background decoration
+   ============================================================ */
+
+.login-background {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.background-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(2px);
+    opacity: 0.18;
+}
+
+.circle-one {
+    width: 450px;
+    height: 450px;
+    background: #3b82f6;
+    top: -180px;
+    left: -120px;
+}
+
+.circle-two {
+    width: 550px;
+    height: 550px;
+    background: #6366f1;
+    right: -200px;
+    bottom: -250px;
+}
+
+.circle-three {
+    width: 250px;
+    height: 250px;
+    background: #38bdf8;
+    right: 25%;
+    top: 10%;
+}
+
+
+/* ============================================================
+   Main container
+   ============================================================ */
+
+.login-container {
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+
+/* ============================================================
+   Branding
+   ============================================================ */
+
+.login-brand {
+    display: flex;
+    align-items: center;
+    padding: 70px;
+    color: white;
+}
+
+.brand-content {
+    max-width: 520px;
+}
+
+.brand-icon {
+    width: 64px;
+    height: 64px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+
+    font-size: 30px;
+
+    margin-bottom: 28px;
+
+    backdrop-filter: blur(10px);
+}
+
+.brand-content h1 {
+    margin: 0;
+
+    font-size: clamp(42px, 5vw, 64px);
+    font-weight: 800;
+    letter-spacing: -2px;
+}
+
+.brand-tagline {
+    margin: 15px 0 20px;
+
+    font-size: 24px;
+    font-weight: 500;
+
+    color: #bfdbfe;
+}
+
+.brand-description {
+    max-width: 460px;
+
+    font-size: 17px;
+    line-height: 1.7;
+
+    color: #cbd5e1;
+}
+
+
+/* ============================================================
+   Features
+   ============================================================ */
+
+.feature-list {
+    margin-top: 42px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+
+    color: #e2e8f0;
+    font-size: 15px;
+}
+
+.feature-icon {
+    width: 27px;
+    height: 27px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: rgba(59, 130, 246, 0.25);
+    color: #93c5fd;
+
+    font-size: 14px;
+    font-weight: bold;
+}
+
+
+/* ============================================================
+   Login wrapper
+   ============================================================ */
+
+.login-card-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 40px;
+}
+
+
+/* ============================================================
+   Login card
+   ============================================================ */
+
+.login-card {
+    width: 100%;
+    max-width: 450px;
+
+    padding: 45px;
+
+    background: rgba(255, 255, 255, 0.97);
+
+    border-radius: 24px;
+
+    box-shadow:
+        0 25px 60px rgba(0, 0, 0, 0.3),
+        0 10px 30px rgba(0, 0, 0, 0.15);
+
+    animation: cardAppear 0.5s ease;
+}
+
+@keyframes cardAppear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* ============================================================
+   Header
+   ============================================================ */
+
+.login-header {
+    margin-bottom: 32px;
+}
+
+.login-header h2 {
+    margin: 0 0 8px;
+
+    color: #0f172a;
+
+    font-size: 32px;
+    font-weight: 750;
+
+    letter-spacing: -0.7px;
+}
+
+.login-header p {
+    margin: 0;
+
+    color: #64748b;
+
+    font-size: 15px;
+}
+
+.mobile-brand-icon {
+    display: none;
+}
+
+
+/* ============================================================
+   Error
+   ============================================================ */
+
+.login-error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    margin-bottom: 22px;
+    padding: 12px 14px;
+
+    border-radius: 10px;
+
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+
+    color: #b91c1c;
+
+    font-size: 14px;
+}
+
+.error-icon {
+    width: 20px;
+    height: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: #dc2626;
+    color: white;
+
+    font-size: 12px;
+    font-weight: bold;
+}
+
+
+/* ============================================================
+   Form
+   ============================================================ */
+
+.form-group {
+    margin-bottom: 22px;
+}
+
+.form-group label {
+    display: block;
+
+    margin-bottom: 8px;
+
+    color: #334155;
+
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.input-wrapper {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+
+    font-size: 16px;
+
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+
+    height: 52px;
+
+    padding:
+        0 45px
+        0 45px;
+
+    border: 1px solid #cbd5e1;
+    border-radius: 11px;
+
+    background: #f8fafc;
+
+    color: #0f172a;
+
+    font-family: inherit;
+    font-size: 15px;
+
+    outline: none;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.input-wrapper input::placeholder {
+    color: #94a3b8;
+}
+
+.input-wrapper input:focus {
+    border-color: #3b82f6;
+
+    background: white;
+
+    box-shadow:
+        0 0 0 4px rgba(59, 130, 246, 0.12);
+}
+
+.input-wrapper input:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+
+/* ============================================================
+   Password
+   ============================================================ */
+
+.password-toggle {
+    position: absolute;
+    right: 10px;
+
+    width: 35px;
+    height: 35px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #64748b;
+
+    cursor: pointer;
+
+    font-size: 16px;
+}
+
+.password-toggle:hover {
+    background: #e2e8f0;
+}
+
+.password-toggle:disabled {
+    cursor: not-allowed;
+}
+
+
+/* ============================================================
+   Login button
+   ============================================================ */
+
+.login-button {
+    width: 100%;
+    height: 53px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+
+    margin-top: 8px;
+
+    border: none;
+    border-radius: 11px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #2563eb,
+            #4f46e5
+        );
+
+    color: white;
+
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 650;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 8px 20px rgba(37, 99, 235, 0.28);
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.login-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 12px 25px rgba(37, 99, 235, 0.35);
+}
+
+.login-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.login-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.button-arrow {
+    font-size: 20px;
+}
+
+
+/* ============================================================
+   Spinner
+   ============================================================ */
+
+.spinner {
+    width: 17px;
+    height: 17px;
+
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: white;
+
+    border-radius: 50%;
+
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+.login-footer {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+
+    margin-top: 30px;
+
+    color: #94a3b8;
+
+    font-size: 12px;
+}
+
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    .login-container {
+        grid-template-columns: 1fr;
+    }
+
+    .login-brand {
+        display: none;
+    }
+
+    .login-card-wrapper {
+        min-height: 100vh;
+
+        padding: 25px;
+    }
+
+    .login-card {
+        max-width: 460px;
+    }
+
+    .mobile-brand-icon {
+        width: 52px;
+        height: 52px;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        margin-bottom: 20px;
+
+        border-radius: 15px;
+
+        background:
+            linear-gradient(
+                135deg,
+                #2563eb,
+                #4f46e5
+            );
+
+        color: white;
+
+        font-size: 24px;
+    }
+}
+
+
+@media (max-width: 500px) {
+
+    .login-card-wrapper {
+        padding: 15px;
+    }
+
+    .login-card {
+        padding: 30px 24px;
+
+        border-radius: 18px;
+    }
+
+    .login-header h2 {
+        font-size: 28px;
+    }
+}
+
+/* ============================================================
+   Application Layout
+   ============================================================ */
+
+   .app-layout {
+    min-height: 100vh;
+    display: flex;
+    background: #f5f7fb;
+}
+
+
+/* ============================================================
+   Sidebar
+   ============================================================ */
+
+.app-sidebar {
+    width: 250px;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    background: #111827;
+    color: white;
+
+    transition: width 0.25s ease;
+
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+
+    z-index: 100;
+}
+
+.app-sidebar.collapsed {
+    width: 72px;
+}
+
+
+/* ============================================================
+   Sidebar Header
+   ============================================================ */
+
+.sidebar-header {
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+
+    padding: 0 20px;
+
+    border-bottom: 1px solid
+        rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-logo {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #2563eb;
+
+    font-size: 18px;
+}
+
+.sidebar-title {
+    margin-left: 12px;
+
+    font-size: 17px;
+    font-weight: 600;
+
+    white-space: nowrap;
+}
+
+
+/* ============================================================
+   Navigation
+   ============================================================ */
+
+.sidebar-navigation {
+    flex: 1;
+
+    padding: 20px 12px;
+}
+
+
+.sidebar-link {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    padding: 12px 14px;
+
+    margin-bottom: 6px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: transparent;
+
+    color: #9ca3af;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        color 0.2s ease;
+}
+
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: white;
+}
+
+
+.sidebar-link.active {
+    background: #2563eb;
+    color: white;
+}
+
+
+.sidebar-icon {
+    width: 22px;
+
+    display: flex;
+    justify-content: center;
+
+    font-size: 17px;
+}
+
+
+/* ============================================================
+   Sidebar Footer
+   ============================================================ */
+
+.sidebar-footer {
+    padding: 12px;
+
+    border-top: 1px solid
+        rgba(255, 255, 255, 0.08);
+}
+
+
+.logout-button {
+    font-family: inherit;
+}
+
+
+/* ============================================================
+   Main Area
+   ============================================================ */
+
+.app-main {
+    width: 100%;
+
+    margin-left: 250px;
+
+    transition: margin-left 0.25s ease;
+}
+
+
+.app-main.sidebar-collapsed {
+    margin-left: 72px;
+}
+
+
+/* ============================================================
+   Topbar
+   ============================================================ */
+
+.app-topbar {
+    height: 72px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 28px;
+
+    background: white;
+
+    border-bottom: 1px solid #e5e7eb;
+
+    position: sticky;
+    top: 0;
+
+    z-index: 50;
+}
+
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+}
+
+
+.sidebar-toggle {
+    width: 38px;
+    height: 38px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #f3f4f6;
+
+    cursor: pointer;
+
+    font-size: 18px;
+}
+
+
+.sidebar-toggle:hover {
+    background: #e5e7eb;
+}
+
+
+.topbar-title {
+    font-size: 18px;
+    font-weight: 600;
+
+    color: #111827;
+}
+
+
+/* ============================================================
+   User
+   ============================================================ */
+
+.topbar-user {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #2563eb;
+
+    color: white;
+
+    font-weight: 600;
+
+    text-transform: uppercase;
+}
+
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+
+.user-name {
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #111827;
+}
+
+
+.user-email {
+    font-size: 12px;
+
+    color: #6b7280;
+}
+
+
+/* ============================================================
+   Content
+   ============================================================ */
+
+.app-content {
+    padding: 28px;
+}
+
+
+/* ============================================================
+   Loading
+   ============================================================ */
+
+.loading-screen {
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    background: #f5f7fb;
+
+    color: #374151;
+}
+
+
+.loading-spinner {
+    width: 32px;
+    height: 32px;
+
+    border: 3px solid #e5e7eb;
+
+    border-top-color: #2563eb;
+
+    border-radius: 50%;
+
+    animation: spin 0.8s linear infinite;
+
+    margin-bottom: 12px;
+}
+
+
+@keyframes spin {
+
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
