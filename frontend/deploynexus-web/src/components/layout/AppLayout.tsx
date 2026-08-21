@@ -3,9 +3,11 @@ import { Outlet, NavLink } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 
 export default function AppLayout() {
+
     const { user, logout } = useAuth();
 
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] =
+        useState(true);
 
     const handleLogout = () => {
         logout();
@@ -14,13 +16,15 @@ export default function AppLayout() {
     return (
         <div className="app-layout">
 
-            {/* ====================================================
-                Sidebar
-            ==================================================== */}
+            {/* =====================================================
+                SIDEBAR
+            ===================================================== */}
 
             <aside
                 className={`app-sidebar ${
-                    sidebarOpen ? "open" : "collapsed"
+                    sidebarOpen
+                        ? "open"
+                        : "collapsed"
                 }`}
             >
 
@@ -33,9 +37,17 @@ export default function AppLayout() {
                     </div>
 
                     {sidebarOpen && (
-                        <span className="sidebar-title">
-                            Deploy Nexus
-                        </span>
+                        <div className="sidebar-brand">
+
+                            <span className="sidebar-title">
+                                Deploy Nexus
+                            </span>
+
+                            <span className="sidebar-subtitle">
+                                Administration
+                            </span>
+
+                        </div>
                     )}
 
                 </div>
@@ -49,7 +61,9 @@ export default function AppLayout() {
                         to="/dashboard"
                         className={({ isActive }) =>
                             `sidebar-link ${
-                                isActive ? "active" : ""
+                                isActive
+                                    ? "active"
+                                    : ""
                             }`
                         }
                     >
@@ -58,7 +72,9 @@ export default function AppLayout() {
                         </span>
 
                         {sidebarOpen && (
-                            <span>Dashboard</span>
+                            <span>
+                                Dashboard
+                            </span>
                         )}
                     </NavLink>
 
@@ -67,7 +83,9 @@ export default function AppLayout() {
                         to="/users"
                         className={({ isActive }) =>
                             `sidebar-link ${
-                                isActive ? "active" : ""
+                                isActive
+                                    ? "active"
+                                    : ""
                             }`
                         }
                     >
@@ -76,7 +94,9 @@ export default function AppLayout() {
                         </span>
 
                         {sidebarOpen && (
-                            <span>Users</span>
+                            <span>
+                                Users
+                            </span>
                         )}
                     </NavLink>
 
@@ -85,7 +105,9 @@ export default function AppLayout() {
                         to="/organizations"
                         className={({ isActive }) =>
                             `sidebar-link ${
-                                isActive ? "active" : ""
+                                isActive
+                                    ? "active"
+                                    : ""
                             }`
                         }
                     >
@@ -94,7 +116,9 @@ export default function AppLayout() {
                         </span>
 
                         {sidebarOpen && (
-                            <span>Organizations</span>
+                            <span>
+                                Organizations
+                            </span>
                         )}
                     </NavLink>
 
@@ -103,7 +127,9 @@ export default function AppLayout() {
                         to="/roles"
                         className={({ isActive }) =>
                             `sidebar-link ${
-                                isActive ? "active" : ""
+                                isActive
+                                    ? "active"
+                                    : ""
                             }`
                         }
                     >
@@ -112,7 +138,9 @@ export default function AppLayout() {
                         </span>
 
                         {sidebarOpen && (
-                            <span>Roles</span>
+                            <span>
+                                Roles
+                            </span>
                         )}
                     </NavLink>
 
@@ -121,7 +149,9 @@ export default function AppLayout() {
                         to="/permissions"
                         className={({ isActive }) =>
                             `sidebar-link ${
-                                isActive ? "active" : ""
+                                isActive
+                                    ? "active"
+                                    : ""
                             }`
                         }
                     >
@@ -130,7 +160,9 @@ export default function AppLayout() {
                         </span>
 
                         {sidebarOpen && (
-                            <span>Permissions</span>
+                            <span>
+                                Permissions
+                            </span>
                         )}
                     </NavLink>
 
@@ -139,7 +171,9 @@ export default function AppLayout() {
                         to="/modules"
                         className={({ isActive }) =>
                             `sidebar-link ${
-                                isActive ? "active" : ""
+                                isActive
+                                    ? "active"
+                                    : ""
                             }`
                         }
                     >
@@ -148,28 +182,35 @@ export default function AppLayout() {
                         </span>
 
                         {sidebarOpen && (
-                            <span>Modules</span>
+                            <span>
+                                Modules
+                            </span>
                         )}
                     </NavLink>
 
                 </nav>
 
 
-                {/* Sidebar bottom */}
+                {/* Footer */}
 
                 <div className="sidebar-footer">
 
                     <button
+                        type="button"
                         className="sidebar-link logout-button"
                         onClick={handleLogout}
                     >
+
                         <span className="sidebar-icon">
                             ↪
                         </span>
 
                         {sidebarOpen && (
-                            <span>Logout</span>
+                            <span>
+                                Logout
+                            </span>
                         )}
+
                     </button>
 
                 </div>
@@ -177,25 +218,26 @@ export default function AppLayout() {
             </aside>
 
 
-            {/* ====================================================
-                Main Application
-            ==================================================== */}
+            {/* =====================================================
+                MAIN APPLICATION
+            ===================================================== */}
 
             <div
                 className={`app-main ${
-                    sidebarOpen ? "sidebar-open" : "sidebar-collapsed"
+                    sidebarOpen
+                        ? "sidebar-open"
+                        : "sidebar-collapsed"
                 }`}
             >
 
-                {/* =================================================
-                    Topbar
-                ================================================= */}
+                {/* Topbar */}
 
                 <header className="app-topbar">
 
                     <div className="topbar-left">
 
                         <button
+                            type="button"
                             className="sidebar-toggle"
                             onClick={() =>
                                 setSidebarOpen(
@@ -218,9 +260,11 @@ export default function AppLayout() {
                     <div className="topbar-user">
 
                         <div className="user-avatar">
-                            {user?.firstName?.charAt(0) ||
-                                user?.username?.charAt(0) ||
-                                "U"}
+                            {(
+                                user?.firstName ||
+                                user?.username ||
+                                "U"
+                            ).charAt(0).toUpperCase()}
                         </div>
 
                         <div className="user-details">
@@ -242,14 +286,10 @@ export default function AppLayout() {
                 </header>
 
 
-                {/* =================================================
-                    Page Content
-                ================================================= */}
+                {/* Page */}
 
                 <main className="app-content">
-
                     <Outlet />
-
                 </main>
 
             </div>

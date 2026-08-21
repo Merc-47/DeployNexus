@@ -6,100 +6,143 @@ import {
 
 import LoginPage from "../pages/auth/LoginPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
+import RolesPage from "../pages/roles/RolesPage";
 
 import AppLayout from "../components/layout/AppLayout";
-import ProtectedRoute from "./ProtectedRoute";
+
+import { useAuth } from "../context/AuthContext";
 
 
 export default function AppRoutes() {
+
+    const {
+        isAuthenticated,
+        isLoading,
+    } = useAuth();
+
+
+    // ============================================================
+    // Restore authentication
+    // ============================================================
+
+    if (isLoading) {
+
+        return (
+            <div
+                style={{
+                    minHeight: "100vh",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                Loading...
+            </div>
+        );
+    }
+
 
     return (
         <Routes>
 
             {/* ====================================================
-                Public Routes
+                PUBLIC ROUTES
             ==================================================== */}
 
             <Route
                 path="/login"
-                element={<LoginPage />}
+                element={
+                    isAuthenticated
+                        ? (
+                            <Navigate
+                                to="/dashboard"
+                                replace
+                            />
+                        )
+                        : (
+                            <LoginPage />
+                        )
+                }
             />
 
 
             {/* ====================================================
-                Protected Routes
+                PROTECTED APPLICATION ROUTES
             ==================================================== */}
 
-            <Route element={<ProtectedRoute />}>
+            <Route
+                element={
+                    isAuthenticated
+                        ? (
+                            <AppLayout />
+                        )
+                        : (
+                            <Navigate
+                                to="/login"
+                                replace
+                            />
+                        )
+                }
+            >
+
+                {/* ==================================================
+                    DASHBOARD
+                ================================================== */}
 
                 <Route
-                    element={<AppLayout />}
-                >
+                    path="/dashboard"
+                    element={
+                        <DashboardPage />
+                    }
+                />
 
-                    <Route
-                        path="/dashboard"
-                        element={<DashboardPage />}
-                    />
 
-                    <Route
-                        path="/users"
-                        element={
-                            <div>
-                                Users
-                            </div>
-                        }
-                    />
+                {/* ==================================================
+                    ROLES
+                ================================================== */}
 
-                    <Route
-                        path="/organizations"
-                        element={
-                            <div>
-                                Organizations
-                            </div>
-                        }
-                    />
-
-                    <Route
-                        path="/roles"
-                        element={
-                            <div>
-                                Roles
-                            </div>
-                        }
-                    />
-
-                    <Route
-                        path="/permissions"
-                        element={
-                            <div>
-                                Permissions
-                            </div>
-                        }
-                    />
-
-                    <Route
-                        path="/modules"
-                        element={
-                            <div>
-                                Modules
-                            </div>
-                        }
-                    />
-
-                </Route>
+                <Route
+                    path="/roles"
+                    element={
+                        <RolesPage />
+                    }
+                />
 
             </Route>
 
 
             {/* ====================================================
-                Default
+                DEFAULT ROUTE
+            ==================================================== */}
+
+            <Route
+                path="/"
+                element={
+                    <Navigate
+                        to={
+                            isAuthenticated
+                                ? "/dashboard"
+                                : "/login"
+                        }
+                        replace
+                    />
+                }
+            />
+
+
+            {/* ====================================================
+                UNKNOWN ROUTE
             ==================================================== */}
 
             <Route
                 path="*"
                 element={
                     <Navigate
-                        to="/dashboard"
+                        to={
+                            isAuthenticated
+                                ? "/dashboard"
+                                : "/login"
+                        }
                         replace
                     />
                 }
