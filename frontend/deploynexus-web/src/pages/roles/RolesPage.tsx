@@ -15,8 +15,12 @@ import type {
     Organization,
 } from "../../types/roles";
 
+import { useNavigate } from "react-router-dom";
+
 
 export default function RolesPage() {
+
+    const navigate = useNavigate();
 
     const [roles, setRoles] =
         useState<Role[]>([]);
@@ -66,6 +70,7 @@ export default function RolesPage() {
             ]);
 
             setRoles(rolesData);
+
             setOrganizations(
                 organizationsData
             );
@@ -185,6 +190,21 @@ export default function RolesPage() {
 
         setEditingRole(role);
         setShowForm(true);
+
+    }
+
+
+    // ============================================================
+    // Manage Permissions
+    // ============================================================
+
+    function handleManagePermissions(
+        role: Role
+    ) {
+
+        navigate(
+            `/roles/${role.id}/permissions`
+        );
 
     }
 
@@ -733,6 +753,22 @@ export default function RolesPage() {
                                                     <td>
 
                                                         <div className="role-actions">
+
+                                                            <button
+                                                                type="button"
+                                                                className="table-action permissions"
+                                                                onClick={() =>
+                                                                    handleManagePermissions(
+                                                                        role
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    !role.isActive
+                                                                }
+                                                            >
+                                                                Manage Permissions
+                                                            </button>
+
 
                                                             <button
                                                                 type="button"

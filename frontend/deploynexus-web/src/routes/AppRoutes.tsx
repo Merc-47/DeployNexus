@@ -7,6 +7,8 @@ import {
 import LoginPage from "../pages/auth/LoginPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
 import RolesPage from "../pages/roles/RolesPage";
+import RolePermissionsPage from "../pages/roles/RolePermissionsPage";
+import PermissionsPage from "../pages/permissions/PermissionsPage";
 
 import AppLayout from "../components/layout/AppLayout";
 
@@ -44,6 +46,7 @@ export default function AppRoutes() {
 
     return (
         <Routes>
+
 
             {/* ====================================================
                 PUBLIC ROUTES
@@ -85,6 +88,7 @@ export default function AppRoutes() {
                 }
             >
 
+
                 {/* ==================================================
                     DASHBOARD
                 ================================================== */}
@@ -107,6 +111,31 @@ export default function AppRoutes() {
                         <RolesPage />
                     }
                 />
+
+
+                {/* ==================================================
+                    ROLE PERMISSIONS
+                ================================================== */}
+
+                <Route
+                    path="/roles/:roleId/permissions"
+                    element={
+                        <RolePermissionsPage />
+                    }
+                />
+
+
+                {/* ==================================================
+                    PERMISSIONS
+                ================================================== */}
+
+                <Route
+                    path="/permissions"
+                    element={
+                        <PermissionsPage />
+                    }
+                />
+
 
             </Route>
 
@@ -147,6 +176,7 @@ export default function AppRoutes() {
                     />
                 }
             />
+
 
         </Routes>
     );
