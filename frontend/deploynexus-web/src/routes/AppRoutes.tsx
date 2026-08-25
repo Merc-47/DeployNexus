@@ -6,6 +6,8 @@ import {
 
 import LoginPage from "../pages/auth/LoginPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
+import UsersPage from "../pages/users/UsersPage";
+import OrganizationsPage from "../pages/organizations/OrganizationsPage";
 import RolesPage from "../pages/roles/RolesPage";
 import RolePermissionsPage from "../pages/roles/RolePermissionsPage";
 import PermissionsPage from "../pages/permissions/PermissionsPage";
@@ -97,6 +99,29 @@ export default function AppRoutes() {
                     path="/dashboard"
                     element={
                         <DashboardPage />
+                    }
+                />
+
+                {/* ==================================================
+                    USERS
+                ================================================== */}
+
+                <Route
+                    path="/users"
+                    element={
+                        <UsersPage />
+                    }
+                />
+
+
+                {/* ==================================================
+                    ORGANIZATIONS
+                ================================================== */}
+
+                <Route
+                    path="/organizations"
+                    element={
+                        <OrganizationsPage />
                     }
                 />
 
