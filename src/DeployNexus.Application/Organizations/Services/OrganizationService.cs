@@ -1,4 +1,5 @@
 ﻿using DeployNexus.Application.Common;
+using DeployNexus.Application.Common.Exceptions;
 using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Application.Organizations.DTOs;
 using DeployNexus.Application.Organizations.Interfaces;
@@ -22,7 +23,8 @@ public class OrganizationService : IOrganizationService
         ValidateName(request.Name);
         ValidateCode(request.Code);
 
-        var normalizedCode = request.Code.Trim().ToUpperInvariant();
+        var normalizedCode =
+            request.Code.Trim().ToUpperInvariant();
 
         var codeExists =
             await _organizationRepository.ExistsByCodeAsync(
@@ -30,7 +32,7 @@ public class OrganizationService : IOrganizationService
 
         if (codeExists)
         {
-            throw new InvalidOperationException(
+            throw new ConflictException(
                 "Organization code already exists");
         }
 
@@ -50,6 +52,7 @@ public class OrganizationService : IOrganizationService
         return MapToDto(organization);
     }
 
+
     public async Task<OrganizationDto?> GetByIdAsync(
         Guid id)
     {
@@ -57,10 +60,13 @@ public class OrganizationService : IOrganizationService
             await _organizationRepository.GetByIdAsync(id);
 
         if (organization == null)
+        {
             return null;
+        }
 
         return MapToDto(organization);
     }
+
 
     public async Task<IEnumerable<OrganizationDto>> GetAllAsync()
     {
@@ -69,6 +75,7 @@ public class OrganizationService : IOrganizationService
 
         return organizations.Select(MapToDto);
     }
+
 
     public async Task<OrganizationDto?> UpdateAsync(
         Guid id,
@@ -81,7 +88,9 @@ public class OrganizationService : IOrganizationService
             await _organizationRepository.GetByIdAsync(id);
 
         if (organization == null)
+        {
             return null;
+        }
 
         var normalizedCode =
             request.Code.Trim().ToUpperInvariant();
@@ -93,7 +102,7 @@ public class OrganizationService : IOrganizationService
 
         if (codeExists)
         {
-            throw new InvalidOperationException(
+            throw new ConflictException(
                 "Organization code already exists");
         }
 
@@ -107,6 +116,7 @@ public class OrganizationService : IOrganizationService
 
         return MapToDto(organization);
     }
+
 
     public async Task<Result> DeactivateAsync(
         Guid id)
@@ -136,35 +146,38 @@ public class OrganizationService : IOrganizationService
         return Result.Ok();
     }
 
+
     private static void ValidateName(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new ArgumentException(
+            throw new ValidationException(
                 "Organization name is required");
         }
 
         if (name.Trim().Length < 2)
         {
-            throw new ArgumentException(
+            throw new ValidationException(
                 "Organization name must contain at least 2 characters");
         }
     }
+
 
     private static void ValidateCode(string code)
     {
         if (string.IsNullOrWhiteSpace(code))
         {
-            throw new ArgumentException(
+            throw new ValidationException(
                 "Organization code is required");
         }
 
         if (code.Trim().Length < 2)
         {
-            throw new ArgumentException(
+            throw new ValidationException(
                 "Organization code must contain at least 2 characters");
         }
     }
+
 
     private static OrganizationDto MapToDto(
         Organization organization)

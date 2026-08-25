@@ -1,4 +1,5 @@
-﻿using DeployNexus.Application.Permissions.DTOs;
+﻿using DeployNexus.Application.Common.Exceptions;
+using DeployNexus.Application.Permissions.DTOs;
 using DeployNexus.Application.Permissions.Services;
 using DeployNexus.Domain.Entities;
 using DeployNexus.Domain.Enums;
@@ -8,37 +9,75 @@ namespace DeployNexus.Tests.Permissions;
 
 public class PermissionServiceTests
 {
-    [Fact]
-    public async Task CreateAsync_ShouldCreatePermissionSuccessfully()
+    private static (
+        FakePermissionRepository PermissionRepository,
+        FakeModuleRepository ModuleRepository,
+        PermissionService Service)
+        CreateService()
     {
-        // Arrange
         var permissionRepository =
             new FakePermissionRepository();
 
         var moduleRepository =
             new FakeModuleRepository();
 
+        var service =
+            new PermissionService(
+                permissionRepository,
+                moduleRepository);
+
+        return (
+            permissionRepository,
+            moduleRepository,
+            service);
+    }
+
+
+    private static async Task<Module> CreateModule(
+        FakeModuleRepository moduleRepository,
+        string name = "User Management",
+        string code = "USER_MANAGEMENT",
+        ModuleStatus status = ModuleStatus.Available)
+    {
         var module = new Module
         {
             Id = Guid.NewGuid(),
-            Name = "User Management",
-            Code = "USER_MANAGEMENT",
+            Name = name,
+            Code = code,
             Description = "User management module",
-            Status = ModuleStatus.Available
+            Status = status
         };
 
         await moduleRepository.AddAsync(module);
 
-        var service = new PermissionService(
-            permissionRepository,
-            moduleRepository);
+        return module;
+    }
 
-        var request = new CreatePermissionRequest
-        {
-            Name = "Create User",
-            Code = "USER_CREATE",
-            ModuleId = module.Id
-        };
+
+    // ============================================================
+    // CREATE
+    // ============================================================
+
+    [Fact]
+    public async Task CreateAsync_ShouldCreatePermissionSuccessfully()
+    {
+        // Arrange
+        var (
+            permissionRepository,
+            moduleRepository,
+            service) = CreateService();
+
+        var module =
+            await CreateModule(
+                moduleRepository);
+
+        var request =
+            new CreatePermissionRequest
+            {
+                Name = "Create User",
+                Code = "USER_CREATE",
+                ModuleId = module.Id
+            };
 
 
         // Act
@@ -48,6 +87,7 @@ public class PermissionServiceTests
 
         // Assert
         Assert.NotNull(result);
+
         Assert.Equal(
             "Create User",
             result.Name);
@@ -60,34 +100,97 @@ public class PermissionServiceTests
             module.Id,
             result.ModuleId);
 
-        Assert.True(result.IsActive);
+        Assert.True(
+            result.IsActive);
     }
 
+
+    [Fact]
+    public async Task CreateAsync_ShouldThrowNotFoundException_WhenModuleDoesNotExist()
+    {
+        // Arrange
+        var (
+            permissionRepository,
+            moduleRepository,
+            service) = CreateService();
+
+        var request =
+            new CreatePermissionRequest
+            {
+                Name = "Create User",
+                Code = "USER_CREATE",
+                ModuleId = Guid.NewGuid()
+            };
+
+
+        // Act
+        var exception =
+            await Assert.ThrowsAsync<NotFoundException>(
+                () => service.CreateAsync(request));
+
+
+        // Assert
+        Assert.Equal(
+            "Module not found",
+            exception.Message);
+    }
+
+
+    [Fact]
+    public async Task CreateAsync_ShouldThrowValidationException_WhenModuleIsDisabled()
+    {
+        // Arrange
+        var (
+            permissionRepository,
+            moduleRepository,
+            service) = CreateService();
+
+        var module =
+            await CreateModule(
+                moduleRepository,
+                "Disabled Module",
+                "DISABLED",
+                ModuleStatus.Disabled);
+
+
+        var request =
+            new CreatePermissionRequest
+            {
+                Name = "Create User",
+                Code = "USER_CREATE",
+                ModuleId = module.Id
+            };
+
+
+        // Act
+        var exception =
+            await Assert.ThrowsAsync<ValidationException>(
+                () => service.CreateAsync(request));
+
+
+        // Assert
+        Assert.Equal(
+            "Cannot create permission for a disabled module",
+            exception.Message);
+    }
+
+
+    // ============================================================
+    // GET BY ID
+    // ============================================================
 
     [Fact]
     public async Task GetByIdAsync_ShouldReturnPermission_WhenExists()
     {
         // Arrange
-        var permissionRepository =
-            new FakePermissionRepository();
-
-        var moduleRepository =
-            new FakeModuleRepository();
-
-        var module = new Module
-        {
-            Id = Guid.NewGuid(),
-            Name = "User Management",
-            Code = "USER_MANAGEMENT",
-            Description = "User management module",
-            Status = ModuleStatus.Available
-        };
-
-        await moduleRepository.AddAsync(module);
-
-        var service = new PermissionService(
+        var (
             permissionRepository,
-            moduleRepository);
+            moduleRepository,
+            service) = CreateService();
+
+        var module =
+            await CreateModule(
+                moduleRepository);
 
 
         var created =
@@ -102,7 +205,8 @@ public class PermissionServiceTests
 
         // Act
         var result =
-            await service.GetByIdAsync(created.Id);
+            await service.GetByIdAsync(
+                created.Id);
 
 
         // Assert
@@ -119,29 +223,42 @@ public class PermissionServiceTests
 
 
     [Fact]
+    public async Task GetByIdAsync_ShouldReturnNull_WhenPermissionDoesNotExist()
+    {
+        // Arrange
+        var (
+            permissionRepository,
+            moduleRepository,
+            service) = CreateService();
+
+
+        // Act
+        var result =
+            await service.GetByIdAsync(
+                Guid.NewGuid());
+
+
+        // Assert
+        Assert.Null(result);
+    }
+
+
+    // ============================================================
+    // GET ALL
+    // ============================================================
+
+    [Fact]
     public async Task GetAllAsync_ShouldReturnAllPermissions()
     {
         // Arrange
-        var permissionRepository =
-            new FakePermissionRepository();
-
-        var moduleRepository =
-            new FakeModuleRepository();
-
-        var module = new Module
-        {
-            Id = Guid.NewGuid(),
-            Name = "User Management",
-            Code = "USER_MANAGEMENT",
-            Description = "User management module",
-            Status = ModuleStatus.Available
-        };
-
-        await moduleRepository.AddAsync(module);
-
-        var service = new PermissionService(
+        var (
             permissionRepository,
-            moduleRepository);
+            moduleRepository,
+            service) = CreateService();
+
+        var module =
+            await CreateModule(
+                moduleRepository);
 
 
         await service.CreateAsync(
@@ -174,30 +291,22 @@ public class PermissionServiceTests
     }
 
 
+    // ============================================================
+    // UPDATE
+    // ============================================================
+
     [Fact]
     public async Task UpdateAsync_ShouldUpdatePermission_WhenExists()
     {
         // Arrange
-        var permissionRepository =
-            new FakePermissionRepository();
-
-        var moduleRepository =
-            new FakeModuleRepository();
-
-        var module = new Module
-        {
-            Id = Guid.NewGuid(),
-            Name = "User Management",
-            Code = "USER_MANAGEMENT",
-            Description = "User management module",
-            Status = ModuleStatus.Available
-        };
-
-        await moduleRepository.AddAsync(module);
-
-        var service = new PermissionService(
+        var (
             permissionRepository,
-            moduleRepository);
+            moduleRepository,
+            service) = CreateService();
+
+        var module =
+            await CreateModule(
+                moduleRepository);
 
 
         var created =
@@ -243,29 +352,51 @@ public class PermissionServiceTests
 
 
     [Fact]
+    public async Task UpdateAsync_ShouldReturnNull_WhenPermissionDoesNotExist()
+    {
+        // Arrange
+        var (
+            permissionRepository,
+            moduleRepository,
+            service) = CreateService();
+
+
+        var request =
+            new UpdatePermissionRequest
+            {
+                Name = "Updated Name",
+                Code = "UPDATED"
+            };
+
+
+        // Act
+        var result =
+            await service.UpdateAsync(
+                Guid.NewGuid(),
+                request);
+
+
+        // Assert
+        Assert.Null(result);
+    }
+
+
+    // ============================================================
+    // DEACTIVATE
+    // ============================================================
+
+    [Fact]
     public async Task DeactivateAsync_ShouldDeactivatePermission_WhenExists()
     {
         // Arrange
-        var permissionRepository =
-            new FakePermissionRepository();
-
-        var moduleRepository =
-            new FakeModuleRepository();
-
-        var module = new Module
-        {
-            Id = Guid.NewGuid(),
-            Name = "User Management",
-            Code = "USER_MANAGEMENT",
-            Description = "User management module",
-            Status = ModuleStatus.Available
-        };
-
-        await moduleRepository.AddAsync(module);
-
-        var service = new PermissionService(
+        var (
             permissionRepository,
-            moduleRepository);
+            moduleRepository,
+            service) = CreateService();
+
+        var module =
+            await CreateModule(
+                moduleRepository);
 
 
         var created =
@@ -290,9 +421,11 @@ public class PermissionServiceTests
 
 
         // Assert
-        Assert.True(result.Success);
+        Assert.True(
+            result.Success);
 
-        Assert.NotNull(permission);
+        Assert.NotNull(
+            permission);
 
         Assert.False(
             permission.IsActive);
@@ -300,17 +433,47 @@ public class PermissionServiceTests
 
 
     [Fact]
+    public async Task DeactivateAsync_ShouldFail_WhenPermissionDoesNotExist()
+    {
+        // Arrange
+        var (
+            permissionRepository,
+            moduleRepository,
+            service) = CreateService();
+
+
+        // Act
+        var result =
+            await service.DeactivateAsync(
+                Guid.NewGuid());
+
+
+        // Assert
+        Assert.False(
+            result.Success);
+
+        Assert.Equal(
+            "Permission not found",
+            result.Message);
+    }
+
+
+    // ============================================================
+    // HAS PERMISSION
+    // ============================================================
+
+    [Fact]
     public async Task HasPermissionAsync_WhenUserHasPermission_ReturnsTrue()
     {
         // Arrange
+        var (
+            permissionRepository,
+            moduleRepository,
+            service) = CreateService();
+
+
         var userId =
             Guid.NewGuid();
-
-        var permissionRepository =
-            new FakePermissionRepository();
-
-        var moduleRepository =
-            new FakeModuleRepository();
 
 
         permissionRepository.SetUserPermission(
@@ -319,11 +482,6 @@ public class PermissionServiceTests
             true);
 
 
-        var service = new PermissionService(
-            permissionRepository,
-            moduleRepository);
-
-
         // Act
         var result =
             await service.HasPermissionAsync(
@@ -332,7 +490,8 @@ public class PermissionServiceTests
 
 
         // Assert
-        Assert.True(result);
+        Assert.True(
+            result);
     }
 
 
@@ -340,14 +499,14 @@ public class PermissionServiceTests
     public async Task HasPermissionAsync_WhenUserDoesNotHavePermission_ReturnsFalse()
     {
         // Arrange
+        var (
+            permissionRepository,
+            moduleRepository,
+            service) = CreateService();
+
+
         var userId =
             Guid.NewGuid();
-
-        var permissionRepository =
-            new FakePermissionRepository();
-
-        var moduleRepository =
-            new FakeModuleRepository();
 
 
         permissionRepository.SetUserPermission(
@@ -356,11 +515,6 @@ public class PermissionServiceTests
             false);
 
 
-        var service = new PermissionService(
-            permissionRepository,
-            moduleRepository);
-
-
         // Act
         var result =
             await service.HasPermissionAsync(
@@ -369,78 +523,7 @@ public class PermissionServiceTests
 
 
         // Assert
-        Assert.False(result);
-    }
-
-
-    [Fact]
-    public async Task CreateAsync_ShouldFail_WhenModuleDoesNotExist()
-    {
-        // Arrange
-        var permissionRepository =
-            new FakePermissionRepository();
-
-        var moduleRepository =
-            new FakeModuleRepository();
-
-        var service = new PermissionService(
-            permissionRepository,
-            moduleRepository);
-
-
-        var request =
-            new CreatePermissionRequest
-            {
-                Name = "Create User",
-                Code = "USER_CREATE",
-                ModuleId = Guid.NewGuid()
-            };
-
-
-        // Act & Assert
-        await Assert.ThrowsAsync<Exception>(
-            () => service.CreateAsync(request));
-    }
-
-
-    [Fact]
-    public async Task CreateAsync_ShouldFail_WhenModuleIsDisabled()
-    {
-        // Arrange
-        var permissionRepository =
-            new FakePermissionRepository();
-
-        var moduleRepository =
-            new FakeModuleRepository();
-
-        var module = new Module
-        {
-            Id = Guid.NewGuid(),
-            Name = "Disabled Module",
-            Code = "DISABLED",
-            Description = "Disabled module",
-            Status = ModuleStatus.Disabled
-        };
-
-        await moduleRepository.AddAsync(module);
-
-
-        var service = new PermissionService(
-            permissionRepository,
-            moduleRepository);
-
-
-        var request =
-            new CreatePermissionRequest
-            {
-                Name = "Create User",
-                Code = "USER_CREATE",
-                ModuleId = module.Id
-            };
-
-
-        // Act & Assert
-        await Assert.ThrowsAsync<Exception>(
-            () => service.CreateAsync(request));
+        Assert.False(
+            result);
     }
 }

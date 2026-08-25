@@ -1,5 +1,6 @@
 ﻿using DeployNexus.Domain.Entities;
 using DeployNexus.Domain.Enums;
+using DeployNexus.Infrastructure.Authentication;
 using Microsoft.EntityFrameworkCore;
 
 namespace DeployNexus.Infrastructure.Data;
@@ -9,9 +10,43 @@ public static class DatabaseInitializer
     public static async Task InitializeAsync(
         DeployNexusDbContext context)
     {
+        await SeedOrganizationsAsync(context);
+
         await SeedModulesAsync(context);
 
         await SeedPermissionsAsync(context);
+
+        await SeedAdminUserAsync(context);
+    }
+
+
+    // ============================================================
+    // Organizations
+    // ============================================================
+
+    private static async Task SeedOrganizationsAsync(
+        DeployNexusDbContext context)
+    {
+        var organization =
+            await context.Organizations
+                .FirstOrDefaultAsync(
+                    x => x.Code == "DEPLOYNEXUS");
+
+        if (organization == null)
+        {
+            organization = new Organization
+            {
+                Id = Guid.NewGuid(),
+                Name = "DeployNexus",
+                Code = "DEPLOYNEXUS",
+                IsActive = true
+            };
+
+            await context.Organizations.AddAsync(
+                organization);
+
+            await context.SaveChangesAsync();
+        }
     }
 
 
@@ -75,7 +110,8 @@ public static class DatabaseInitializer
         {
             var exists =
                 await context.Modules
-                    .AnyAsync(x => x.Code == module.Code);
+                    .AnyAsync(
+                        x => x.Code == module.Code);
 
             if (!exists)
             {
@@ -131,6 +167,13 @@ public static class DatabaseInitializer
             {
                 Name = "Delete Users",
                 Code = "USER_DELETE",
+                ModuleCode = "USERS"
+            },
+
+            new
+            {
+                Name = "Assign User Role",
+                Code = "USER_ROLE_ASSIGN",
                 ModuleCode = "USERS"
             },
 
@@ -293,8 +336,8 @@ public static class DatabaseInitializer
         {
             var exists =
                 await context.Permissions
-                    .AnyAsync(x =>
-                        x.Code == permission.Code);
+                    .AnyAsync(
+                        x => x.Code == permission.Code);
 
             if (exists)
             {
@@ -324,6 +367,71 @@ public static class DatabaseInitializer
             await context.Permissions.AddAsync(entity);
         }
 
+
+        await context.SaveChangesAsync();
+    }
+
+
+    // ============================================================
+    // Admin User
+    // ============================================================
+
+    private static async Task SeedAdminUserAsync(
+        DeployNexusDbContext context)
+    {
+        var existingUser =
+            await context.Users
+                .FirstOrDefaultAsync(
+                    x => x.Username == "admin");
+
+
+        if (existingUser != null)
+        {
+            return;
+        }
+
+
+        var organization =
+            await context.Organizations
+                .FirstOrDefaultAsync(
+                    x => x.Code == "DEPLOYNEXUS");
+
+
+        if (organization == null)
+        {
+            throw new InvalidOperationException(
+                "DeployNexus organization was not found.");
+        }
+
+
+        var passwordHasher =
+            new PasswordHasher();
+
+
+        var adminUser = new User
+        {
+            Id = Guid.NewGuid(),
+
+            Username = "admin",
+
+            Email = "admin@deploynexus.local",
+
+            PasswordHash =
+                passwordHasher.Hash("Admin@12345"),
+
+            FirstName = "System",
+
+            LastName = "Administrator",
+
+            IsActive = true,
+
+            OrganizationId = organization.Id,
+
+            RoleId = null
+        };
+
+
+        await context.Users.AddAsync(adminUser);
 
         await context.SaveChangesAsync();
     }

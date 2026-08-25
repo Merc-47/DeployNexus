@@ -1,4 +1,4 @@
-﻿using DeployNexus.Application.Common;
+﻿using DeployNexus.Application.Common.Exceptions;
 using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Application.RolePermissions.DTOs;
 using DeployNexus.Application.RolePermissions.Interfaces;
@@ -32,7 +32,7 @@ public class RolePermissionService : IRolePermissionService
 
         if (role == null)
         {
-            throw new Exception("Role not found");
+            throw new NotFoundException("Role not found");
         }
 
 
@@ -41,7 +41,7 @@ public class RolePermissionService : IRolePermissionService
 
         if (permission == null)
         {
-            throw new Exception("Permission not found");
+            throw new NotFoundException("Permission not found");
         }
 
 
@@ -51,7 +51,8 @@ public class RolePermissionService : IRolePermissionService
 
         if (existing != null)
         {
-            throw new Exception("Permission already assigned");
+            throw new ConflictException(
+                "Permission already assigned");
         }
 
 
@@ -80,7 +81,6 @@ public class RolePermissionService : IRolePermissionService
     }
 
 
-
     public async Task<bool> RemoveAsync(
         Guid roleId,
         Guid permissionId)
@@ -106,7 +106,6 @@ public class RolePermissionService : IRolePermissionService
 
         return true;
     }
-
 
 
     public async Task<IEnumerable<RolePermissionDto>> GetPermissionsAsync(

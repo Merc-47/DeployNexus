@@ -12,38 +12,49 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
 
-    public AuthController(IAuthService authService)
+    public AuthController(
+        IAuthService authService)
     {
         _authService = authService;
     }
+
+
+    // ============================================================
+    // LOGIN
+    // ============================================================
 
     [HttpPost("login")]
     public async Task<ActionResult<LoginResponse>> Login(
         LoginRequest request)
     {
-        try
-        {
-            var response = await _authService.LoginAsync(request);
+        var response =
+            await _authService.LoginAsync(request);
 
-            return Ok(response);
-        }
-        catch (UnauthorizedAccessException ex)
-        {
-            return Unauthorized(new
-            {
-                message = ex.Message
-            });
-        }
+        return Ok(response);
     }
+
+
+    // ============================================================
+    // CURRENT USER
+    // ============================================================
+
     [Authorize]
     [HttpGet("me")]
     public IActionResult Me()
     {
         return Ok(new
         {
-            userId = User.FindFirstValue(ClaimTypes.NameIdentifier),
-            username = User.FindFirstValue(ClaimTypes.Name),
-            email = User.FindFirstValue(ClaimTypes.Email)
+            userId =
+                User.FindFirstValue(
+                    ClaimTypes.NameIdentifier),
+
+            username =
+                User.FindFirstValue(
+                    ClaimTypes.Name),
+
+            email =
+                User.FindFirstValue(
+                    ClaimTypes.Email)
         });
     }
 }

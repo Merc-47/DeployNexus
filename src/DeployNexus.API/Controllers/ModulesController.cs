@@ -59,20 +59,13 @@ public class ModulesController : ControllerBase
     public async Task<IActionResult> Create(
         [FromBody] CreateModuleRequest request)
     {
-        try
-        {
-            var module =
-                await _moduleService.CreateAsync(request);
+        var module =
+            await _moduleService.CreateAsync(request);
 
-            return CreatedAtAction(
-                nameof(GetById),
-                new { id = module.Id },
-                module);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        return CreatedAtAction(
+            nameof(GetById),
+            new { id = module.Id },
+            module);
     }
 
 

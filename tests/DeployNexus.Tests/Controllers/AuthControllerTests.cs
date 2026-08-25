@@ -1,13 +1,8 @@
-﻿using System.Net;
-using System.Net.Http.Json;
-using DeployNexus.Application.Authentication.DTOs;
-using DeployNexus.Application.Authentication.Interfaces;
+﻿using DeployNexus.Application.Authentication.DTOs;
 using DeployNexus.Application.Authentication.Services;
-using DeployNexus.Application.Common.Interfaces;
+using DeployNexus.Tests.Authentication;
 using DeployNexus.Tests.Repositories;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DeployNexus.Tests.Controllers;
 
@@ -18,7 +13,8 @@ public class AuthControllerTests
     {
         // Arrange
 
-        var userRepository = new FakeUserRepository();
+        var userRepository =
+            new FakeUserRepository();
 
         var user = new DeployNexus.Domain.Entities.User
         {
@@ -34,18 +30,20 @@ public class AuthControllerTests
 
         await userRepository.AddAsync(user);
 
-        var passwordHasher = new DeployNexus.Tests.Authentication.FakePasswordHasher();
+        var passwordHasher =
+            new FakePasswordHasher();
 
         var jwtTokenGenerator =
-            new DeployNexus.Tests.Authentication.FakeJwtTokenGenerator();
+            new FakeJwtTokenGenerator();
 
         var authService = new AuthService(
             userRepository,
             passwordHasher,
             jwtTokenGenerator);
 
-        var controller = new DeployNexus.API.Controllers.AuthController(
-            authService);
+        var controller =
+            new DeployNexus.API.Controllers.AuthController(
+                authService);
 
         var request = new LoginRequest
         {
@@ -53,18 +51,25 @@ public class AuthControllerTests
             Password = "TestPassword123!"
         };
 
+
         // Act
 
-        var result = await controller.Login(request);
+        var result =
+            await controller.Login(request);
+
 
         // Assert
 
-        var okResult = Assert.IsType<OkObjectResult>(result.Result);
+        var okResult =
+            Assert.IsType<OkObjectResult>(
+                result.Result);
 
         var response =
-            Assert.IsType<LoginResponse>(okResult.Value);
+            Assert.IsType<LoginResponse>(
+                okResult.Value);
 
         Assert.NotNull(response.Token);
+
         Assert.Equal(
             $"fake-token-{user.Id}",
             response.Token);
@@ -75,17 +80,18 @@ public class AuthControllerTests
 
 
     [Fact]
-    public async Task Login_WithInvalidUsername_ReturnsUnauthorized()
+    public async Task Login_WithInvalidUsername_ThrowsUnauthorizedAccessException()
     {
         // Arrange
 
-        var userRepository = new FakeUserRepository();
+        var userRepository =
+            new FakeUserRepository();
 
         var passwordHasher =
-            new DeployNexus.Tests.Authentication.FakePasswordHasher();
+            new FakePasswordHasher();
 
         var jwtTokenGenerator =
-            new DeployNexus.Tests.Authentication.FakeJwtTokenGenerator();
+            new FakeJwtTokenGenerator();
 
         var authService = new AuthService(
             userRepository,
@@ -102,28 +108,27 @@ public class AuthControllerTests
             Password = "TestPassword123!"
         };
 
-        // Act
 
-        var result = await controller.Login(request);
+        // Act & Assert
 
-        // Assert
+        var exception =
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(
+                () => controller.Login(request));
 
-        var unauthorizedResult =
-            Assert.IsType<UnauthorizedObjectResult>(
-                result.Result);
 
         Assert.Equal(
-            StatusCodes.Status401Unauthorized,
-            unauthorizedResult.StatusCode);
+            "Invalid username or password",
+            exception.Message);
     }
 
 
     [Fact]
-    public async Task Login_WithInvalidPassword_ReturnsUnauthorized()
+    public async Task Login_WithInvalidPassword_ThrowsUnauthorizedAccessException()
     {
         // Arrange
 
-        var userRepository = new FakeUserRepository();
+        var userRepository =
+            new FakeUserRepository();
 
         var user = new DeployNexus.Domain.Entities.User
         {
@@ -140,10 +145,10 @@ public class AuthControllerTests
         await userRepository.AddAsync(user);
 
         var passwordHasher =
-            new DeployNexus.Tests.Authentication.FakePasswordHasher();
+            new FakePasswordHasher();
 
         var jwtTokenGenerator =
-            new DeployNexus.Tests.Authentication.FakeJwtTokenGenerator();
+            new FakeJwtTokenGenerator();
 
         var authService = new AuthService(
             userRepository,
@@ -160,28 +165,27 @@ public class AuthControllerTests
             Password = "WrongPassword!"
         };
 
-        // Act
 
-        var result = await controller.Login(request);
+        // Act & Assert
 
-        // Assert
+        var exception =
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(
+                () => controller.Login(request));
 
-        var unauthorizedResult =
-            Assert.IsType<UnauthorizedObjectResult>(
-                result.Result);
 
         Assert.Equal(
-            StatusCodes.Status401Unauthorized,
-            unauthorizedResult.StatusCode);
+            "Invalid username or password",
+            exception.Message);
     }
 
 
     [Fact]
-    public async Task Login_WithInactiveUser_ReturnsUnauthorized()
+    public async Task Login_WithInactiveUser_ThrowsUnauthorizedAccessException()
     {
         // Arrange
 
-        var userRepository = new FakeUserRepository();
+        var userRepository =
+            new FakeUserRepository();
 
         var user = new DeployNexus.Domain.Entities.User
         {
@@ -198,10 +202,10 @@ public class AuthControllerTests
         await userRepository.AddAsync(user);
 
         var passwordHasher =
-            new DeployNexus.Tests.Authentication.FakePasswordHasher();
+            new FakePasswordHasher();
 
         var jwtTokenGenerator =
-            new DeployNexus.Tests.Authentication.FakeJwtTokenGenerator();
+            new FakeJwtTokenGenerator();
 
         var authService = new AuthService(
             userRepository,
@@ -218,18 +222,16 @@ public class AuthControllerTests
             Password = "TestPassword123!"
         };
 
-        // Act
 
-        var result = await controller.Login(request);
+        // Act & Assert
 
-        // Assert
+        var exception =
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(
+                () => controller.Login(request));
 
-        var unauthorizedResult =
-            Assert.IsType<UnauthorizedObjectResult>(
-                result.Result);
 
         Assert.Equal(
-            StatusCodes.Status401Unauthorized,
-            unauthorizedResult.StatusCode);
+            "User account is inactive",
+            exception.Message);
     }
 }

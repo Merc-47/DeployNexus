@@ -1,4 +1,5 @@
 ﻿using DeployNexus.Application.Common;
+using DeployNexus.Application.Common.Exceptions;
 using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Application.Modules.DTOs;
 using DeployNexus.Application.Modules.Interfaces;
@@ -18,16 +19,39 @@ public class ModuleService : IModuleService
     }
 
 
+    // ============================================================
+    // CREATE
+    // ============================================================
+
     public async Task<ModuleDto> CreateAsync(
         CreateModuleRequest request)
     {
+        if (request == null)
+        {
+            throw new ValidationException(
+                "Module request is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            throw new ValidationException(
+                "Module name is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Code))
+        {
+            throw new ValidationException(
+                "Module code is required");
+        }
+
+
         var moduleExists =
             await _moduleRepository.ExistsByCodeAsync(
                 request.Code);
 
         if (moduleExists)
         {
-            throw new Exception(
+            throw new ConflictException(
                 "A module with this code already exists");
         }
 
@@ -35,8 +59,8 @@ public class ModuleService : IModuleService
         var module = new Module
         {
             Id = Guid.NewGuid(),
-            Name = request.Name,
-            Code = request.Code,
+            Name = request.Name.Trim(),
+            Code = request.Code.Trim().ToUpperInvariant(),
             Description = request.Description,
             Status = ModuleStatus.Available
         };
@@ -50,6 +74,10 @@ public class ModuleService : IModuleService
         return MapToDto(module);
     }
 
+
+    // ============================================================
+    // GET BY ID
+    // ============================================================
 
     public async Task<ModuleDto?> GetByIdAsync(
         Guid id)
@@ -68,6 +96,10 @@ public class ModuleService : IModuleService
     }
 
 
+    // ============================================================
+    // GET ALL
+    // ============================================================
+
     public async Task<IEnumerable<ModuleDto>> GetAllAsync()
     {
         var modules =
@@ -78,10 +110,33 @@ public class ModuleService : IModuleService
     }
 
 
+    // ============================================================
+    // UPDATE
+    // ============================================================
+
     public async Task<ModuleDto?> UpdateAsync(
         Guid id,
         UpdateModuleRequest request)
     {
+        if (request == null)
+        {
+            throw new ValidationException(
+                "Module request is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Name))
+        {
+            throw new ValidationException(
+                "Module name is required");
+        }
+
+        if (string.IsNullOrWhiteSpace(request.Code))
+        {
+            throw new ValidationException(
+                "Module code is required");
+        }
+
+
         var module =
             await _moduleRepository.GetByIdAsync(id);
 
@@ -92,8 +147,31 @@ public class ModuleService : IModuleService
         }
 
 
-        module.Name = request.Name;
-        module.Code = request.Code;
+        var normalizedCode =
+            request.Code.Trim().ToUpperInvariant();
+
+
+        // Only check duplicate code if the code
+        // is actually being changed.
+        if (!string.Equals(
+                module.Code,
+                normalizedCode,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            var moduleExists =
+                await _moduleRepository.ExistsByCodeAsync(
+                    normalizedCode);
+
+            if (moduleExists)
+            {
+                throw new ConflictException(
+                    "A module with this code already exists");
+            }
+        }
+
+
+        module.Name = request.Name.Trim();
+        module.Code = normalizedCode;
         module.Description = request.Description;
 
 
@@ -105,6 +183,10 @@ public class ModuleService : IModuleService
         return MapToDto(module);
     }
 
+
+    // ============================================================
+    // DISABLE
+    // ============================================================
 
     public async Task<Result> DisableAsync(
         Guid id)
@@ -120,6 +202,13 @@ public class ModuleService : IModuleService
         }
 
 
+        if (module.Status == ModuleStatus.Disabled)
+        {
+            return Result.Failure(
+                "Module is already disabled");
+        }
+
+
         module.Status = ModuleStatus.Disabled;
 
 
@@ -131,6 +220,10 @@ public class ModuleService : IModuleService
         return Result.Ok();
     }
 
+
+    // ============================================================
+    // MAPPING
+    // ============================================================
 
     private static ModuleDto MapToDto(
         Module module)

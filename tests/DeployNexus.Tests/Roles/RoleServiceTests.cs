@@ -1,237 +1,257 @@
-﻿using DeployNexus.Application.Roles.DTOs;
+﻿using DeployNexus.Application.Common.Exceptions;
+using DeployNexus.Application.Roles.DTOs;
 using DeployNexus.Application.Roles.Services;
-using DeployNexus.Tests.Organizations;
 using DeployNexus.Tests.Repositories;
 
 namespace DeployNexus.Tests.Roles;
 
 public class RoleServiceTests
 {
+    private static (
+        FakeRoleRepository RoleRepository,
+        FakeOrganizationRepository OrganizationRepository,
+        RoleService Service)
+        CreateService()
+    {
+        var roleRepository =
+            new FakeRoleRepository();
+
+        var organizationRepository =
+            new FakeOrganizationRepository();
+
+        var service =
+            new RoleService(
+                roleRepository,
+                organizationRepository);
+
+        return (
+            roleRepository,
+            organizationRepository,
+            service);
+    }
+
+
+    private static Domain.Entities.Organization
+        CreateOrganization(
+            FakeOrganizationRepository repository,
+            string name = "DeployNexus",
+            string code = "DNX",
+            bool isActive = true)
+    {
+        var organization =
+            new Domain.Entities.Organization
+            {
+                Id = Guid.NewGuid(),
+                Name = name,
+                Code = code,
+                IsActive = isActive
+            };
+
+        repository.AddTestOrganization(
+            organization);
+
+        return organization;
+    }
+
+
     [Fact]
     public async Task CreateAsync_ShouldCreateRoleSuccessfully()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
+
+        var organization =
+            CreateOrganization(
+                organizationRepository);
+
+        var request =
+            new CreateRoleRequest
+            {
+                Name = "Administrator",
+                Description = "Full system access",
+                OrganizationId = organization.Id
+            };
 
 
-        var organization = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "DeployNexus",
-            Code = "DNX",
-            IsActive = true
-        };
+        var result =
+            await service.CreateAsync(request);
 
 
-        await organizationRepository.AddAsync(organization);
-
-
-        var request = new CreateRoleRequest
-        {
-            Name = "Administrator",
-            Description = "Full system access",
-            OrganizationId = organization.Id
-        };
-
-
-        // Act
-        var result = await service.CreateAsync(request);
-
-
-        // Assert
         Assert.NotNull(result);
-        Assert.Equal("Administrator", result.Name);
-        Assert.Equal("Full system access", result.Description);
-        Assert.True(result.IsActive);
-        Assert.Equal(organization.Id, result.OrganizationId);
-    }
+        Assert.Equal(
+            "Administrator",
+            result.Name);
 
+        Assert.Equal(
+            "Full system access",
+            result.Description);
+
+        Assert.True(result.IsActive);
+
+        Assert.Equal(
+            organization.Id,
+            result.OrganizationId);
+    }
 
 
     [Fact]
     public async Task GetByIdAsync_ShouldReturnRole_WhenRoleExists()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
+
+        var organization =
+            CreateOrganization(
+                organizationRepository);
+
+        var created =
+            await service.CreateAsync(
+                new CreateRoleRequest
+                {
+                    Name = "Admin",
+                    Description = "Access",
+                    OrganizationId = organization.Id
+                });
 
 
-        var organization = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "DeployNexus",
-            Code = "DNX",
-            IsActive = true
-        };
-
-        await organizationRepository.AddAsync(organization);
+        var result =
+            await service.GetByIdAsync(
+                created.Id);
 
 
-        var created = await service.CreateAsync(new CreateRoleRequest
-        {
-            Name = "Admin",
-            Description = "Access",
-            OrganizationId = organization.Id
-        });
-
-
-        // Act
-        var result = await service.GetByIdAsync(created.Id);
-
-
-        // Assert
         Assert.NotNull(result);
-        Assert.Equal(created.Id, result.Id);
-        Assert.Equal("Admin", result.Name);
-    }
+        Assert.Equal(
+            created.Id,
+            result.Id);
 
+        Assert.Equal(
+            "Admin",
+            result.Name);
+    }
 
 
     [Fact]
     public async Task GetAllAsync_ShouldReturnAllRoles()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
+
+        var organization =
+            CreateOrganization(
+                organizationRepository);
 
 
-        var organization = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "DeployNexus",
-            Code = "DNX",
-            IsActive = true
-        };
-
-        await organizationRepository.AddAsync(organization);
+        await service.CreateAsync(
+            new CreateRoleRequest
+            {
+                Name = "Admin",
+                Description = "Admin Access",
+                OrganizationId = organization.Id
+            });
 
 
-        await service.CreateAsync(new CreateRoleRequest
-        {
-            Name = "Admin",
-            Description = "Admin Access",
-            OrganizationId = organization.Id
-        });
+        await service.CreateAsync(
+            new CreateRoleRequest
+            {
+                Name = "User",
+                Description = "User Access",
+                OrganizationId = organization.Id
+            });
 
 
-        await service.CreateAsync(new CreateRoleRequest
-        {
-            Name = "User",
-            Description = "User Access",
-            OrganizationId = organization.Id
-        });
+        var result =
+            await service.GetAllAsync();
 
 
-        // Act
-        var result = await service.GetAllAsync();
-
-
-        // Assert
-        Assert.Equal(2, result.Count());
+        Assert.Equal(
+            2,
+            result.Count());
     }
-
 
 
     [Fact]
     public async Task UpdateAsync_ShouldUpdateRole_WhenRoleExists()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
+
+        var organization =
+            CreateOrganization(
+                organizationRepository);
 
 
-        var organization = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "DeployNexus",
-            Code = "DNX",
-            IsActive = true
-        };
-
-        await organizationRepository.AddAsync(organization);
-
-
-        var created = await service.CreateAsync(new CreateRoleRequest
-        {
-            Name = "Admin",
-            Description = "Old Description",
-            OrganizationId = organization.Id
-        });
+        var created =
+            await service.CreateAsync(
+                new CreateRoleRequest
+                {
+                    Name = "Admin",
+                    Description = "Old Description",
+                    OrganizationId = organization.Id
+                });
 
 
-        // Act
-        var result = await service.UpdateAsync(
-            created.Id,
-            new UpdateRoleRequest
-            {
-                Name = "Administrator",
-                Description = "Updated Description"
-            });
+        var result =
+            await service.UpdateAsync(
+                created.Id,
+                new UpdateRoleRequest
+                {
+                    Name = "Administrator",
+                    Description = "Updated Description"
+                });
 
 
-        // Assert
         Assert.NotNull(result);
-        Assert.Equal("Administrator", result.Name);
-        Assert.Equal("Updated Description", result.Description);
-    }
 
+        Assert.Equal(
+            "Administrator",
+            result.Name);
+
+        Assert.Equal(
+            "Updated Description",
+            result.Description);
+    }
 
 
     [Fact]
     public async Task DeactivateAsync_ShouldDeactivateRole_WhenRoleExists()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
+
+        var organization =
+            CreateOrganization(
+                organizationRepository);
 
 
-        var organization = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "DeployNexus",
-            Code = "DNX",
-            IsActive = true
-        };
-
-        await organizationRepository.AddAsync(organization);
-
-
-        var created = await service.CreateAsync(new CreateRoleRequest
-        {
-            Name = "Admin",
-            Description = "Access",
-            OrganizationId = organization.Id
-        });
+        var created =
+            await service.CreateAsync(
+                new CreateRoleRequest
+                {
+                    Name = "Admin",
+                    Description = "Access",
+                    OrganizationId = organization.Id
+                });
 
 
-        // Act
-        var result = await service.DeactivateAsync(created.Id);
+        var result =
+            await service.DeactivateAsync(
+                created.Id);
 
-        var role = await service.GetByIdAsync(created.Id);
+        var role =
+            await service.GetByIdAsync(
+                created.Id);
 
 
-        // Assert
         Assert.True(result.Success);
         Assert.NotNull(role);
         Assert.False(role.IsActive);
@@ -239,80 +259,85 @@ public class RoleServiceTests
 
 
     [Fact]
-    public async Task CreateAsync_ShouldFail_WhenOrganizationDoesNotExist()
+    public async Task CreateAsync_ShouldThrowNotFoundException_WhenOrganizationDoesNotExist()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
 
-        var request = new CreateRoleRequest
-        {
-            Name = "Administrator",
-            Description = "Full system access",
-            OrganizationId = Guid.NewGuid()
-        };
 
-        // Act & Assert
-        await Assert.ThrowsAsync<Exception>(
-            () => service.CreateAsync(request));
+        var request =
+            new CreateRoleRequest
+            {
+                Name = "Administrator",
+                Description = "Full system access",
+                OrganizationId = Guid.NewGuid()
+            };
+
+
+        var exception =
+            await Assert.ThrowsAsync<NotFoundException>(
+                () => service.CreateAsync(request));
+
+
+        Assert.Equal(
+            "Organization not found",
+            exception.Message);
     }
 
 
     [Fact]
-    public async Task CreateAsync_ShouldFail_WhenOrganizationIsInactive()
+    public async Task CreateAsync_ShouldThrowValidationException_WhenOrganizationIsInactive()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
 
-        var organization = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "Inactive Organization",
-            Code = "INACTIVE",
-            IsActive = false
-        };
 
-        await organizationRepository.AddAsync(organization);
+        var organization =
+            CreateOrganization(
+                organizationRepository,
+                "Inactive Organization",
+                "INACTIVE",
+                false);
 
-        var request = new CreateRoleRequest
-        {
-            Name = "Administrator",
-            Description = "Full system access",
-            OrganizationId = organization.Id
-        };
 
-        // Act & Assert
-        await Assert.ThrowsAsync<Exception>(
-            () => service.CreateAsync(request));
+        var request =
+            new CreateRoleRequest
+            {
+                Name = "Administrator",
+                Description = "Full system access",
+                OrganizationId = organization.Id
+            };
+
+
+        var exception =
+            await Assert.ThrowsAsync<ValidationException>(
+                () => service.CreateAsync(request));
+
+
+        Assert.Equal(
+            "Organization is inactive",
+            exception.Message);
     }
 
 
     [Fact]
     public async Task GetByIdAsync_ShouldReturnNull_WhenRoleDoesNotExist()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
 
-        var roleId = Guid.NewGuid();
 
-        // Act
-        var result = await service.GetByIdAsync(roleId);
+        var result =
+            await service.GetByIdAsync(
+                Guid.NewGuid());
 
-        // Assert
+
         Assert.Null(result);
     }
 
@@ -320,28 +345,26 @@ public class RoleServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldReturnNull_WhenRoleDoesNotExist()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
 
-        var roleId = Guid.NewGuid();
 
-        var request = new UpdateRoleRequest
-        {
-            Name = "Updated Role",
-            Description = "Updated Description"
-        };
+        var request =
+            new UpdateRoleRequest
+            {
+                Name = "Updated Role",
+                Description = "Updated Description"
+            };
 
-        // Act
-        var result = await service.UpdateAsync(
-            roleId,
-            request);
 
-        // Assert
+        var result =
+            await service.UpdateAsync(
+                Guid.NewGuid(),
+                request);
+
+
         Assert.Null(result);
     }
 
@@ -349,113 +372,155 @@ public class RoleServiceTests
     [Fact]
     public async Task DeactivateAsync_ShouldFail_WhenRoleDoesNotExist()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
 
-        var roleId = Guid.NewGuid();
 
-        // Act
-        var result = await service.DeactivateAsync(roleId);
+        var result =
+            await service.DeactivateAsync(
+                Guid.NewGuid());
 
-        // Assert
+
         Assert.False(result.Success);
+
+        Assert.Equal(
+            "Role not found",
+            result.Message);
     }
 
+
     [Fact]
-    public async Task CreateAsync_ShouldFail_WhenRoleNameAlreadyExistsInOrganization()
+    public async Task DeactivateAsync_ShouldFail_WhenRoleIsAlreadyInactive()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
 
-        var organization = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "DeployNexus",
-            Code = "DNX",
-            IsActive = true
-        };
+        var organization =
+            CreateOrganization(
+                organizationRepository);
 
-        await organizationRepository.AddAsync(organization);
 
-        var request = new CreateRoleRequest
-        {
-            Name = "Administrator",
-            Description = "Full system access",
-            OrganizationId = organization.Id
-        };
+        var created =
+            await service.CreateAsync(
+                new CreateRoleRequest
+                {
+                    Name = "Admin",
+                    Description = "Access",
+                    OrganizationId = organization.Id
+                });
 
-        // Create the first role
-        await service.CreateAsync(request);
 
-        // Act & Assert
-        await Assert.ThrowsAsync<Exception>(
-            () => service.CreateAsync(request));
+        await service.DeactivateAsync(
+            created.Id);
+
+
+        var result =
+            await service.DeactivateAsync(
+                created.Id);
+
+
+        Assert.False(result.Success);
+
+        Assert.Equal(
+            "Role is already inactive",
+            result.Message);
+    }
+
+
+    [Fact]
+    public async Task CreateAsync_ShouldThrowConflictException_WhenRoleNameAlreadyExistsInOrganization()
+    {
+        var (
+            roleRepository,
+            organizationRepository,
+            service) = CreateService();
+
+        var organization =
+            CreateOrganization(
+                organizationRepository);
+
+
+        var request =
+            new CreateRoleRequest
+            {
+                Name = "Administrator",
+                Description = "Full system access",
+                OrganizationId = organization.Id
+            };
+
+
+        await service.CreateAsync(
+            request);
+
+
+        var exception =
+            await Assert.ThrowsAsync<ConflictException>(
+                () => service.CreateAsync(request));
+
+
+        Assert.Equal(
+            "A role with this name already exists in the organization",
+            exception.Message);
     }
 
 
     [Fact]
     public async Task CreateAsync_ShouldAllowSameRoleNameInDifferentOrganizations()
     {
-        // Arrange
-        var roleRepository = new FakeRoleRepository();
-        var organizationRepository = new FakeOrganizationRepository();
-
-        var service = new RoleService(
+        var (
             roleRepository,
-            organizationRepository);
+            organizationRepository,
+            service) = CreateService();
 
-        var organization1 = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "Organization One",
-            Code = "ORG1",
-            IsActive = true
-        };
 
-        var organization2 = new Domain.Entities.Organization
-        {
-            Id = Guid.NewGuid(),
-            Name = "Organization Two",
-            Code = "ORG2",
-            IsActive = true
-        };
+        var organization1 =
+            CreateOrganization(
+                organizationRepository,
+                "Organization One",
+                "ORG1");
 
-        await organizationRepository.AddAsync(organization1);
-        await organizationRepository.AddAsync(organization2);
 
-        // Act
-        var role1 = await service.CreateAsync(
-            new CreateRoleRequest
-            {
-                Name = "Administrator",
-                Description = "Admin for Organization One",
-                OrganizationId = organization1.Id
-            });
+        var organization2 =
+            CreateOrganization(
+                organizationRepository,
+                "Organization Two",
+                "ORG2");
 
-        var role2 = await service.CreateAsync(
-            new CreateRoleRequest
-            {
-                Name = "Administrator",
-                Description = "Admin for Organization Two",
-                OrganizationId = organization2.Id
-            });
 
-        // Assert
+        var role1 =
+            await service.CreateAsync(
+                new CreateRoleRequest
+                {
+                    Name = "Administrator",
+                    Description = "Admin for Organization One",
+                    OrganizationId = organization1.Id
+                });
+
+
+        var role2 =
+            await service.CreateAsync(
+                new CreateRoleRequest
+                {
+                    Name = "Administrator",
+                    Description = "Admin for Organization Two",
+                    OrganizationId = organization2.Id
+                });
+
+
         Assert.NotNull(role1);
         Assert.NotNull(role2);
 
-        Assert.Equal("Administrator", role1.Name);
-        Assert.Equal("Administrator", role2.Name);
+        Assert.Equal(
+            "Administrator",
+            role1.Name);
+
+        Assert.Equal(
+            "Administrator",
+            role2.Name);
 
         Assert.Equal(
             organization1.Id,
