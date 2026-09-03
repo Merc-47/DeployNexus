@@ -4,6 +4,7 @@ using DeployNexus.API.Authorization;
 using DeployNexus.API.Exceptions;
 
 using DeployNexus.Application;
+using DeployNexus.Application.Common.Interfaces;
 using DeployNexus.Infrastructure;
 using DeployNexus.Infrastructure.Data;
 
@@ -103,6 +104,16 @@ builder.Services.AddSwaggerGen(options =>
 // ============================================================
 
 builder.Services.AddApplication();
+
+// ============================================================
+// Current User
+// ============================================================
+
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddScoped<
+    ICurrentUserService,
+    CurrentUserService>();
 
 
 // ============================================================

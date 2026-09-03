@@ -8,16 +8,26 @@ public interface IUserRepository
 
     Task<User?> GetByIdAsync(Guid id);
 
+    Task<User?> GetByIdAsync(
+        Guid id,
+        Guid organizationId);
+
     Task<IEnumerable<User>> GetAllAsync();
 
+    Task<IEnumerable<User>> GetAllAsync(
+        Guid organizationId);
+
     Task<IEnumerable<User>> GetInactiveUsersAsync();
+
+    Task<IEnumerable<User>> GetInactiveUsersAsync(
+        Guid organizationId);
 
     Task<User?> GetByUsernameAsync(string username);
 
     Task<bool> ExistsByUsernameAsync(
-    Guid organizationId,
-    string username,
-    Guid? excludeUserId = null);
+        Guid organizationId,
+        string username,
+        Guid? excludeUserId = null);
 
     Task<bool> ExistsByEmailAsync(
         Guid organizationId,
