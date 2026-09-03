@@ -1,9 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+
 using DeployNexus.Application.Authentication.DTOs;
 using DeployNexus.Application.Authentication.Interfaces;
 using DeployNexus.Domain.Entities;
+
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -13,7 +15,8 @@ public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly JwtSettings _settings;
 
-    public JwtTokenGenerator(IOptions<JwtSettings> settings)
+    public JwtTokenGenerator(
+        IOptions<JwtSettings> settings)
     {
         _settings = settings.Value;
     }
@@ -22,37 +25,95 @@ public class JwtTokenGenerator : IJwtTokenGenerator
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new(ClaimTypes.Name, user.Username),
-            new(ClaimTypes.Email, user.Email)
+            // ----------------------------------------------------
+            // Identity
+            // ----------------------------------------------------
+
+            new(
+                ClaimTypes.NameIdentifier,
+                user.Id.ToString()),
+
+            new(
+                ClaimTypes.Name,
+                user.Username),
+
+            new(
+                ClaimTypes.Email,
+                user.Email),
+
+            // ----------------------------------------------------
+            // Organization
+            // ----------------------------------------------------
+
+            new(
+                "organizationId",
+                user.OrganizationId.ToString())
         };
+
+
+        // --------------------------------------------------------
+        // Role information
+        // --------------------------------------------------------
 
         if (user.RoleId.HasValue)
         {
             claims.Add(
-                new Claim("roleId", user.RoleId.Value.ToString()));
+                new Claim(
+                    "roleId",
+                    user.RoleId.Value.ToString()));
+
+
+            // Role should already be loaded by authentication.
+            if (user.Role != null)
+            {
+                claims.Add(
+                    new Claim(
+                        "roleType",
+                        ((int)user.Role.RoleType).ToString()));
+            }
         }
 
-        var key = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_settings.SecretKey));
 
-        var credentials = new SigningCredentials(
-            key,
-            SecurityAlgorithms.HmacSha256);
+        // --------------------------------------------------------
+        // Create signing key
+        // --------------------------------------------------------
 
-        var expires = DateTime.UtcNow.AddMinutes(
-            _settings.ExpirationMinutes);
+        var key =
+            new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(
+                    _settings.SecretKey));
 
-        var token = new JwtSecurityToken(
-            issuer: _settings.Issuer,
-            audience: _settings.Audience,
-            claims: claims,
-            expires: expires,
-            signingCredentials: credentials);
+
+        var credentials =
+            new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256);
+
+
+        var expires =
+            DateTime.UtcNow.AddMinutes(
+                _settings.ExpirationMinutes);
+
+
+        // --------------------------------------------------------
+        // Generate JWT
+        // --------------------------------------------------------
+
+        var token =
+            new JwtSecurityToken(
+                issuer: _settings.Issuer,
+                audience: _settings.Audience,
+                claims: claims,
+                expires: expires,
+                signingCredentials: credentials);
+
 
         return new LoginResponse
         {
-            Token = new JwtSecurityTokenHandler().WriteToken(token),
+            Token =
+                new JwtSecurityTokenHandler()
+                    .WriteToken(token),
+
             ExpiresAt = expires
         };
     }

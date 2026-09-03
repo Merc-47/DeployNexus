@@ -4,17 +4,48 @@ namespace DeployNexus.Application.Common.Interfaces;
 
 public interface IOrganizationRepository
 {
-    Task<Organization> AddAsync(Organization organization);
+    // ============================================================
+    // SYSTEM ACCESS
+    // ============================================================
 
-    Task<Organization?> GetByIdAsync(Guid id);
+    Task<Organization> AddAsync(
+        Organization organization);
+
+    Task<Organization?> GetByIdAsync(
+        Guid id);
 
     Task<IEnumerable<Organization>> GetAllAsync();
+
+
+    // ============================================================
+    // ORGANIZATION-SCOPED ACCESS
+    // ============================================================
+
+    Task<Organization?> GetByIdAsync(
+        Guid id,
+        Guid organizationId);
+
+
+    // ============================================================
+    // VALIDATION
+    // ============================================================
 
     Task<bool> ExistsByCodeAsync(
         string code,
         Guid? excludeOrganizationId = null);
 
-    Task UpdateAsync(Organization organization);
+
+    // ============================================================
+    // UPDATE
+    // ============================================================
+
+    Task UpdateAsync(
+        Organization organization);
+
+
+    // ============================================================
+    // SAVE
+    // ============================================================
 
     Task SaveChangesAsync();
 }
